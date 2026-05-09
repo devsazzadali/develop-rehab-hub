@@ -1,11 +1,12 @@
 import { MessageCircle, Phone } from "lucide-react";
-import { SITE, waLink } from "@/lib/site-config";
+import { useSiteInfo, waLinkFor } from "@/lib/use-site-data";
 
 export function FloatingButtons() {
+  const SITE = useSiteInfo();
   return (
     <div className="fixed right-4 bottom-4 z-40 flex flex-col gap-3">
       <a
-        href={waLink()}
+        href={waLinkFor(SITE.whatsapp)}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="WhatsApp"

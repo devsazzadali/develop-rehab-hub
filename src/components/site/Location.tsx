@@ -1,7 +1,8 @@
 import { MapPin, Phone, MessageCircle, Mail } from "lucide-react";
-import { SITE, waLink } from "@/lib/site-config";
+import { useSiteInfo, waLinkFor } from "@/lib/use-site-data";
 
 export function Location() {
+  const SITE = useSiteInfo();
   return (
     <section id="contact" className="py-20 lg:py-28 bg-background">
       <div className="container mx-auto px-4">
@@ -55,7 +56,7 @@ export function Location() {
                 <Phone className="w-5 h-5" /> কল করুন
               </a>
               <a
-                href={waLink()}
+                href={waLinkFor(SITE.whatsapp)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-2xl bg-success text-success-foreground font-semibold shadow-elegant hover:scale-[1.02] transition"

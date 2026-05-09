@@ -1,7 +1,8 @@
 import { Facebook, Mail, MapPin, Phone } from "lucide-react";
-import { SITE } from "@/lib/site-config";
+import { useSiteInfo } from "@/lib/use-site-data";
 
 export function Footer() {
+  const SITE = useSiteInfo();
   return (
     <footer className="bg-primary text-primary-foreground pt-16 pb-6">
       <div className="container mx-auto px-4">
@@ -9,17 +10,14 @@ export function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl bg-primary-foreground text-primary grid place-items-center font-bold">
-                ডে
+                {SITE.brandInitial}
               </div>
               <div>
-                <div className="font-bold">ডেভেলপ ফিজিওথেরাপি</div>
+                <div className="font-bold">{SITE.shortName}</div>
                 <div className="text-xs opacity-80">নিউরো রিহ্যাবিলিটেশন সেন্টার</div>
               </div>
             </div>
-            <p className="text-sm opacity-90 leading-relaxed max-w-md">
-              রংপুরের আধুনিক ফিজিওথেরাপি ও নিউরো রিহ্যাবিলিটেশন সেন্টার।
-              অভিজ্ঞ চিকিৎসকের তত্ত্বাবধানে সাশ্রয়ী মূল্যে উন্নত সেবা।
-            </p>
+            <p className="text-sm opacity-90 leading-relaxed max-w-md">{SITE.footerTagline}</p>
             <a
               href={SITE.facebook}
               target="_blank"
@@ -46,7 +44,7 @@ export function Footer() {
             <ul className="space-y-3 text-sm opacity-90">
               <li className="flex items-start gap-2">
                 <Phone className="w-4 h-4 mt-0.5" />
-                <a href={`tel:${SITE.phone}`}>০১৯৫২-৯১৩১৮৮</a>
+                <a href={`tel:${SITE.phone}`}>{SITE.phoneDisplay}</a>
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="w-4 h-4 mt-0.5" />
@@ -61,7 +59,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-primary-foreground/15 text-center text-xs opacity-80">
-          © {new Date().getFullYear()} ডেভেলপ ফিজিওথেরাপি এন্ড নিউরো রিহ্যাবিলিটেশন সেন্টার। সর্বস্বত্ব সংরক্ষিত।
+          © {new Date().getFullYear()} {SITE.name}। সর্বস্বত্ব সংরক্ষিত।
         </div>
       </div>
     </footer>

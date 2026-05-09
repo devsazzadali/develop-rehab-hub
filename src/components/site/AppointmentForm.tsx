@@ -4,7 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Calendar, Loader2, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { SITE } from "@/lib/site-config";
+import { useSiteInfo } from "@/lib/use-site-data";
 
 const schema = z.object({
   name: z.string().trim().min(2, "নাম দিন").max(80),
@@ -38,6 +38,7 @@ const problems = [
 ];
 
 export function AppointmentForm() {
+  const SITE = useSiteInfo();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -96,7 +97,7 @@ export function AppointmentForm() {
             <div className="mt-6 p-5 rounded-2xl glass">
               <div className="text-sm text-muted-foreground">দ্রুত যোগাযোগ</div>
               <a href={`tel:${SITE.phone}`} className="text-2xl font-bold text-primary block mt-1">
-                ০১৯৫২-৯১৩১৮৮
+                {SITE.phoneDisplay}
               </a>
             </div>
           </motion.div>

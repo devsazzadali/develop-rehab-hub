@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
-import { SITE } from "@/lib/site-config";
+import { useSiteInfo } from "@/lib/use-site-data";
 
 const links = [
   { href: "#services", label: "সেবা" },
@@ -13,6 +13,7 @@ const links = [
 ];
 
 export function Navbar() {
+  const SITE = useSiteInfo();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -32,11 +33,11 @@ export function Navbar() {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 min-w-0">
           <div className="w-10 h-10 rounded-xl gradient-primary grid place-items-center text-primary-foreground font-bold shadow-soft shrink-0">
-            ডে
+            {SITE.brandInitial}
           </div>
           <div className="min-w-0">
             <div className="font-bold text-sm sm:text-base text-foreground truncate">
-              ডেভেলপ ফিজিওথেরাপি
+              {SITE.shortName}
             </div>
             <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
               নিউরো রিহ্যাবিলিটেশন সেন্টার

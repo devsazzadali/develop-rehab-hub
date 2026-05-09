@@ -116,31 +116,39 @@ VALUES ('${userId}', 'admin');`}
   );
 }
 
-type Tab = "appointments" | "videos" | "tracking";
+type Tab = "appointments" | "videos" | "site" | "tracking";
+
+const TABS: { key: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: "appointments", label: "অ্যাপয়েন্টমেন্ট", icon: CalendarDays },
+  { key: "videos", label: "ভিডিও", icon: Video },
+  { key: "site", label: "সাইট তথ্য", icon: Settings2 },
+  { key: "tracking", label: "Pixel / GTM", icon: Sparkles },
+];
 
 function Dashboard() {
   const [tab, setTab] = useState<Tab>("appointments");
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-secondary/40 via-background to-accent/20">
+      <header className="border-b border-border/60 bg-card/70 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-bold text-gradient">অ্যাডমিন প্যানেল</h1>
-            <p className="text-xs text-muted-foreground">সাইট ম্যানেজমেন্ট</p>
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl gradient-primary grid place-items-center text-primary-foreground shadow-elegant">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gradient">অ্যাডমিন প্যানেল</h1>
+              <p className="text-xs text-muted-foreground">সম্পূর্ণ সাইট ম্যানেজমেন্ট</p>
+            </div>
           </div>
-          <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 rounded-lg gradient-primary text-primary-foreground inline-flex items-center gap-2 text-sm">
+          <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 rounded-lg bg-card border border-border hover:border-destructive hover:text-destructive inline-flex items-center gap-2 text-sm transition">
             <LogOut className="w-4 h-4" /> লগআউট
           </button>
         </div>
         <div className="container mx-auto px-4 pb-3 flex gap-2 overflow-x-auto">
-          {([
-            ["appointments", "অ্যাপয়েন্টমেন্ট"],
-            ["videos", "ভিডিও"],
-            ["tracking", "Pixel / GTM"],
-          ] as [Tab, string][]).map(([k, label]) => (
-            <button key={k} onClick={() => setTab(k)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${tab === k ? "gradient-primary text-primary-foreground shadow-soft" : "bg-card border border-border text-foreground hover:border-primary"}`}>
-              {label}
+          {TABS.map(({ key, label, icon: Icon }) => (
+            <button key={key} onClick={() => setTab(key)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition inline-flex items-center gap-2 ${tab === key ? "gradient-primary text-primary-foreground shadow-soft" : "bg-card border border-border text-foreground hover:border-primary"}`}>
+              <Icon className="w-4 h-4" /> {label}
             </button>
           ))}
         </div>
@@ -149,6 +157,7 @@ function Dashboard() {
       <main className="container mx-auto px-4 py-8">
         {tab === "appointments" && <AppointmentsTab />}
         {tab === "videos" && <VideosTab />}
+        {tab === "site" && <SiteInfoTab />}
         {tab === "tracking" && <TrackingTab />}
       </main>
     </div>

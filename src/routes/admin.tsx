@@ -414,3 +414,121 @@ function TrackingTab() {
     </div>
   );
 }
+
+function StatCard({ label, value, tone }: { label: string; value: number; tone: "primary" | "info" | "success" | "muted" }) {
+  const toneCls = {
+    primary: "from-primary/15 to-primary/5 text-primary",
+    info: "from-blue-500/15 to-blue-500/5 text-blue-600",
+    success: "from-emerald-500/15 to-emerald-500/5 text-emerald-600",
+    muted: "from-muted to-muted/40 text-foreground",
+  }[tone];
+  return (
+    <div className={`rounded-2xl p-4 border border-border bg-gradient-to-br ${toneCls} shadow-soft`}>
+      <div className="text-xs font-semibold opacity-80">{label}</div>
+      <div className="text-3xl font-extrabold mt-1">{value.toLocaleString("bn-BD")}</div>
+    </div>
+  );
+}
+
+const SITE_FIELDS: { key: keyof SiteInfo; label: string; placeholder: string; multiline?: boolean; group: string }[] = [
+  { key: "name", label: "সাইটের পূর্ণ নাম", placeholder: "ডেভেলপ ফিজিওথেরাপি...", group: "ব্র্যান্ড" },
+  { key: "shortName", label: "সংক্ষিপ্ত নাম", placeholder: "ডেভেলপ ফিজিওথেরাপি", group: "ব্র্যান্ড" },
+  { key: "brandInitial", label: "লোগো অক্ষর", placeholder: "ডে", group: "ব্র্যান্ড" },
+  { key: "footerTagline", label: "ফুটার ট্যাগলাইন", placeholder: "সংক্ষিপ্ত পরিচিতি...", multiline: true, group: "ব্র্যান্ড" },
+  { key: "phone", label: "ফোন (ডায়াল)", placeholder: "01952913188", group: "যোগাযোগ" },
+  { key: "phoneDisplay", label: "ফোন (প্রদর্শন)", placeholder: "০১৯৫২-৯১৩১৮৮", group: "যোগাযোগ" },
+  { key: "whatsapp", label: "WhatsApp নাম্বার", placeholder: "8801952913188 (কান্ট্রি কোডসহ)", group: "যোগাযোগ" },
+  { key: "email", label: "ইমেইল", placeholder: "you@example.com", group: "যোগাযোগ" },
+  { key: "facebook", label: "Facebook পেজ লিংক", placeholder: "https://facebook.com/...", group: "যোগাযোগ" },
+  { key: "address", label: "ঠিকানা", placeholder: "ধাপ মেডিকেল মোড়, রংপুর", group: "অবস্থান" },
+  { key: "mapEmbed", label: "Google Map Embed URL", placeholder: "https://www.google.com/maps?q=...&output=embed", multiline: true, group: "অবস্থান" },
+];
+
+function SiteInfoTab() {
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    const keys = Object.values(INFO_KEY_MAP);
+    const { data, error } = await (supabase as any).from("site_settings").select("key,value").in("key", keys);
+    if (error) toast.error(error.message);
+    else {
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => (map[r.key] = r.value || ""));
+      setValues(map);
+    }
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const rows = SITE_FIELDS.map((f) => ({
+        key: INFO_KEY_MAP[f.key],
+        value: values[INFO_KEY_MAP[f.key]] ?? "",
+      }));
+      const { error } = await (supabase as any).from("site_settings").upsert(rows, { onConflict: "key" });
+      if (error) throw error;
+      toast.success("সাইট তথ্য সংরক্ষণ হয়েছে");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
+  };
+
+  if (loading) return <div className="grid place-items-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+
+  const groups = Array.from(new Set(SITE_FIELDS.map((f) => f.group)));
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      <div className="bg-gradient-to-br from-primary/10 via-card to-accent/10 rounded-2xl p-6 border border-border shadow-soft">
+        <h2 className="text-xl font-bold text-foreground inline-flex items-center gap-2">
+          <Settings2 className="w-5 h-5 text-primary" /> সাইট তথ্য কাস্টমাইজ করুন
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">নাম, ফোন, ইমেইল, ঠিকানা, ম্যাপ — সব কিছু এখান থেকে পরিবর্তন করুন। সাইটে সাথে সাথে আপডেট হবে।</p>
+      </div>
+
+      {groups.map((g) => (
+        <div key={g} className="bg-card rounded-2xl p-6 border border-border shadow-soft space-y-4">
+          <h3 className="font-bold text-foreground text-lg">{g}</h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            {SITE_FIELDS.filter((f) => f.group === g).map((f) => {
+              const k = INFO_KEY_MAP[f.key];
+              return (
+                <div key={k} className={`space-y-1.5 ${f.multiline ? "md:col-span-2" : ""}`}>
+                  <label className="text-sm font-semibold text-foreground">{f.label}</label>
+                  {f.multiline ? (
+                    <textarea value={values[k] ?? ""} onChange={(e) => setValues({ ...values, [k]: e.target.value })}
+                      placeholder={f.placeholder} rows={3}
+                      className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm" />
+                  ) : (
+                    <input value={values[k] ?? ""} onChange={(e) => setValues({ ...values, [k]: e.target.value })}
+                      placeholder={f.placeholder}
+                      className="w-full rounded-xl border border-input bg-background px-3 py-2.5" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {values[INFO_KEY_MAP.mapEmbed] && (
+        <div className="bg-card rounded-2xl p-4 border border-border shadow-soft">
+          <div className="text-sm font-semibold text-foreground mb-2 inline-flex items-center gap-2">
+            <ImageIcon className="w-4 h-4" /> ম্যাপ প্রিভিউ
+          </div>
+          <iframe src={values[INFO_KEY_MAP.mapEmbed]} className="w-full h-64 rounded-xl border border-border" loading="lazy" />
+        </div>
+      )}
+
+      <div className="sticky bottom-4 flex justify-end">
+        <button onClick={save} disabled={saving} className="px-6 py-3 rounded-2xl gradient-primary text-primary-foreground font-bold inline-flex items-center gap-2 disabled:opacity-70 shadow-elegant">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} সব সংরক্ষণ করুন
+        </button>
+      </div>
+    </div>
+  );
+}

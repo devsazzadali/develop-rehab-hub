@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, LogOut, Phone, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { CalendarDays, Image as ImageIcon, Loader2, LogOut, Phone, Plus, RefreshCw, Save, Settings2, Sparkles, Trash2, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { INFO_KEY_MAP, type SiteInfo } from "@/lib/use-site-data";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({

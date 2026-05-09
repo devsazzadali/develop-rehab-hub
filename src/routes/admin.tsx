@@ -186,10 +186,23 @@ function AppointmentsTab() {
     if (error) toast.error(error.message); else { toast.success("মুছে ফেলা হয়েছে"); load(); }
   };
 
+  const stats = {
+    total: items.length,
+    new: items.filter((i) => i.status === "new").length,
+    booked: items.filter((i) => i.status === "booked").length,
+    done: items.filter((i) => i.status === "done").length,
+  };
+
   return (
-    <div>
-      <div className="flex justify-end mb-4">
-        <button onClick={load} className="px-3 py-2 rounded-lg border border-border hover:bg-accent inline-flex items-center gap-2 text-sm">
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label="মোট" value={stats.total} tone="primary" />
+        <StatCard label="নতুন" value={stats.new} tone="info" />
+        <StatCard label="বুকড" value={stats.booked} tone="success" />
+        <StatCard label="সম্পন্ন" value={stats.done} tone="muted" />
+      </div>
+      <div className="flex justify-end">
+        <button onClick={load} className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-accent inline-flex items-center gap-2 text-sm">
           <RefreshCw className="w-4 h-4" /> রিফ্রেশ
         </button>
       </div>

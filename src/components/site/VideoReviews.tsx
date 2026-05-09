@@ -2,8 +2,13 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Play } from "lucide-react";
 import { SITE } from "@/lib/site-config";
+import { useSiteVideos } from "@/lib/use-site-data";
 
 export function VideoReviews() {
+  const { videos } = useSiteVideos("review");
+  const list = videos.length
+    ? videos.map((v) => ({ id: v.video_id, title: v.title }))
+    : SITE.reviewVideos;
   return (
     <section id="reviews" className="py-20 lg:py-28 bg-background">
       <div className="container mx-auto px-4">
@@ -20,7 +25,7 @@ export function VideoReviews() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {SITE.reviewVideos.map((v, i) => (
+          {list.map((v, i) => (
             <ReviewCard key={v.id + i} videoId={v.id} title={v.title} index={i} />
           ))}
         </div>

@@ -2,10 +2,13 @@ import { motion } from "framer-motion";
 import { Phone, Play, ShieldCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/site-config";
+import { useSiteVideos } from "@/lib/use-site-data";
 import doctorImg from "@/assets/doctor-treatment.jpg";
 
 export function Hero() {
   const [showVideo, setShowVideo] = useState(false);
+  const { videos } = useSiteVideos("hero");
+  const heroVideoId = videos[0]?.video_id || SITE.heroVideoId;
 
   return (
     <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 gradient-hero overflow-hidden">
@@ -69,7 +72,7 @@ export function Hero() {
               {showVideo ? (
                 <iframe
                   className="absolute inset-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${SITE.heroVideoId}?autoplay=1`}
+                  src={`https://www.youtube.com/embed/${heroVideoId}?autoplay=1`}
                   title="পরিচিতি"
                   allow="autoplay; encrypted-media"
                   allowFullScreen

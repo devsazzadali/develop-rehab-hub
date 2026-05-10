@@ -2,12 +2,13 @@ import { motion } from "framer-motion";
 import { Phone, Play, ShieldCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "@/lib/site-config";
-import { useSiteVideos } from "@/lib/use-site-data";
+import { useSiteVideos, useSiteInfo } from "@/lib/use-site-data";
 import doctorImg from "@/assets/doctor-treatment.jpg";
 
 export function Hero() {
   const [showVideo, setShowVideo] = useState(false);
   const { videos } = useSiteVideos("hero");
+  const INFO = useSiteInfo();
   const heroVideoId = videos[0]?.video_id || SITE.heroVideoId;
 
   return (
@@ -24,15 +25,13 @@ export function Hero() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm font-medium text-primary mb-6">
               <Sparkles className="w-4 h-4" />
-              রংপুরের আধুনিক ফিজিওথেরাপি সেন্টার
+              {INFO.heroBadge}
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.15] text-foreground">
-              ব্যথা ও প্যারালাইসিসের{" "}
-              <span className="text-gradient">আধুনিক ফিজিওথেরাপি</span> চিকিৎসা
+              {INFO.heroTitle}
             </h1>
             <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
-              দক্ষ ও অভিজ্ঞ ফিজিওথেরাপিস্টের মাধ্যমে আধুনিক যন্ত্রপাতি দিয়ে উন্নত
-              চিকিৎসা সেবা। ঘরে বসেই বুক করুন আপনার অ্যাপয়েন্টমেন্ট।
+              {INFO.heroSubtitle}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">

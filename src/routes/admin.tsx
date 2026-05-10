@@ -127,6 +127,26 @@ const TABS: { key: Tab; label: string; icon: React.ComponentType<{ className?: s
 
 function Dashboard() {
   const [tab, setTab] = useState<Tab>("appointments");
+  const [overview, setOverview] = useState({ total: 0, today: 0, videos: 0, pixelOn: false });
+
+  useEffect(() => {
+    (async () => {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const [{ count: total }, { count: todayCount }, { count: videos }, { data: pix }] = await Promise.all([
+        supabase.from("appointments").select("*", { count: "exact", head: true }),
+        supabase.from("appointments").select("*", { count: "exact", head: true }).gte("created_at", today.toISOString()),
+        (supabase as any).from("site_videos").select("*", { count: "exact", head: true }),
+        (supabase as any).from("site_settings").select("value").eq("key", "facebook_pixel_id").maybeSingle(),
+      ]);
+      setOverview({
+        total: total ?? 0,
+        today: todayCount ?? 0,
+        videos: videos ?? 0,
+        pixelOn: !!(pix?.value),
+      });
+    })();
+  }, [tab]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/40 via-background to-accent/20">
       <header className="border-b border-border/60 bg-card/70 backdrop-blur-xl sticky top-0 z-10">
@@ -140,9 +160,14 @@ function Dashboard() {
               <p className="text-xs text-muted-foreground">সম্পূর্ণ সাইট ম্যানেজমেন্ট</p>
             </div>
           </div>
-          <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 rounded-lg bg-card border border-border hover:border-destructive hover:text-destructive inline-flex items-center gap-2 text-sm transition">
-            <LogOut className="w-4 h-4" /> লগআউট
-          </button>
+          <div className="flex items-center gap-2">
+            <a href="/" target="_blank" rel="noreferrer" className="px-3 py-2 rounded-lg bg-card border border-border hover:border-primary inline-flex items-center gap-2 text-sm transition">
+              সাইট দেখুন ↗
+            </a>
+            <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 rounded-lg bg-card border border-border hover:border-destructive hover:text-destructive inline-flex items-center gap-2 text-sm transition">
+              <LogOut className="w-4 h-4" /> লগআউট
+            </button>
+          </div>
         </div>
         <div className="container mx-auto px-4 pb-3 flex gap-2 overflow-x-auto">
           {TABS.map(({ key, label, icon: Icon }) => (
@@ -153,6 +178,18 @@ function Dashboard() {
           ))}
         </div>
       </header>
+
+      <div className="container mx-auto px-4 pt-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="আজকের লিড" value={overview.today} tone="primary" />
+          <StatCard label="মোট অ্যাপয়েন্টমেন্ট" value={overview.total} tone="info" />
+          <StatCard label="মোট ভিডিও" value={overview.videos} tone="success" />
+          <div className={`rounded-2xl p-4 border border-border bg-gradient-to-br shadow-soft ${overview.pixelOn ? "from-emerald-500/15 to-emerald-500/5 text-emerald-700" : "from-muted to-muted/40 text-muted-foreground"}`}>
+            <div className="text-xs font-semibold opacity-80">FB Pixel</div>
+            <div className="text-2xl font-extrabold mt-1">{overview.pixelOn ? "সক্রিয়" : "নিষ্ক্রিয়"}</div>
+          </div>
+        </div>
+      </div>
 
       <main className="container mx-auto px-4 py-8">
         {tab === "appointments" && <AppointmentsTab />}
@@ -435,13 +472,27 @@ const SITE_FIELDS: { key: keyof SiteInfo; label: string; placeholder: string; mu
   { key: "shortName", label: "সংক্ষিপ্ত নাম", placeholder: "ডেভেলপ ফিজিওথেরাপি", group: "ব্র্যান্ড" },
   { key: "brandInitial", label: "লোগো অক্ষর", placeholder: "ডে", group: "ব্র্যান্ড" },
   { key: "footerTagline", label: "ফুটার ট্যাগলাইন", placeholder: "সংক্ষিপ্ত পরিচিতি...", multiline: true, group: "ব্র্যান্ড" },
-  { key: "phone", label: "ফোন (ডায়াল)", placeholder: "01952913188", group: "যোগাযোগ" },
-  { key: "phoneDisplay", label: "ফোন (প্রদর্শন)", placeholder: "০১৯৫২-৯১৩১৮৮", group: "যোগাযোগ" },
+
+  { key: "heroBadge", label: "হিরো ব্যাজ টেক্সট", placeholder: "রংপুরের #১ সেন্টার", group: "হিরো সেকশন" },
+  { key: "heroTitle", label: "হিরো প্রধান শিরোনাম", placeholder: "ব্যথামুক্ত জীবনের জন্য...", multiline: true, group: "হিরো সেকশন" },
+  { key: "heroSubtitle", label: "হিরো সাবটাইটেল", placeholder: "প্যারালাইসিস, PLID...", multiline: true, group: "হিরো সেকশন" },
+
+  { key: "phone", label: "প্রধান ফোন (ডায়াল)", placeholder: "01952913188", group: "যোগাযোগ" },
+  { key: "phoneDisplay", label: "প্রধান ফোন (প্রদর্শন)", placeholder: "০১৯৫২-৯১৩১৮৮", group: "যোগাযোগ" },
+  { key: "secondPhone", label: "দ্বিতীয় ফোন (ঐচ্ছিক)", placeholder: "01XXXXXXXXX", group: "যোগাযোগ" },
   { key: "whatsapp", label: "WhatsApp নাম্বার", placeholder: "8801952913188 (কান্ট্রি কোডসহ)", group: "যোগাযোগ" },
+  { key: "whatsappMessage", label: "WhatsApp ডিফল্ট মেসেজ", placeholder: "আমি অ্যাপয়েন্টমেন্ট নিতে চাই।", multiline: true, group: "যোগাযোগ" },
   { key: "email", label: "ইমেইল", placeholder: "you@example.com", group: "যোগাযোগ" },
   { key: "facebook", label: "Facebook পেজ লিংক", placeholder: "https://facebook.com/...", group: "যোগাযোগ" },
+  { key: "youtube", label: "YouTube চ্যানেল লিংক", placeholder: "https://youtube.com/@...", group: "যোগাযোগ" },
+
   { key: "address", label: "ঠিকানা", placeholder: "ধাপ মেডিকেল মোড়, রংপুর", group: "অবস্থান" },
+  { key: "hours", label: "খোলা থাকার সময়", placeholder: "সর্বদা খোলা / সকাল ৯টা - রাত ১০টা", group: "অবস্থান" },
   { key: "mapEmbed", label: "Google Map Embed URL", placeholder: "https://www.google.com/maps?q=...&output=embed", multiline: true, group: "অবস্থান" },
+
+  { key: "seoTitle", label: "SEO টাইটেল", placeholder: "৬০ অক্ষরের মধ্যে", group: "SEO" },
+  { key: "seoDescription", label: "SEO বিবরণ", placeholder: "১৬০ অক্ষরের মধ্যে", multiline: true, group: "SEO" },
+  { key: "ogImage", label: "Open Graph শেয়ার ইমেজ URL", placeholder: "https://...jpg (1200x630)", group: "SEO" },
 ];
 
 function SiteInfoTab() {

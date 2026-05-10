@@ -17,38 +17,112 @@ export type Database = {
       appointments: {
         Row: {
           address: string | null
+          admin_notes: string | null
+          business_category: string | null
+          call_status: string
           created_at: string
           details: string | null
+          email: string | null
+          follow_up_status: string
           id: string
+          interest_status: string | null
+          labels: string[]
+          lead_source: string | null
+          meeting_date: string | null
+          meeting_time: string | null
           name: string
+          next_followup_date: string | null
           phone: string
+          priority: string
+          problem_category: string | null
           problem_type: string
           status: string
           updated_at: string
         }
         Insert: {
           address?: string | null
+          admin_notes?: string | null
+          business_category?: string | null
+          call_status?: string
           created_at?: string
           details?: string | null
+          email?: string | null
+          follow_up_status?: string
           id?: string
+          interest_status?: string | null
+          labels?: string[]
+          lead_source?: string | null
+          meeting_date?: string | null
+          meeting_time?: string | null
           name: string
+          next_followup_date?: string | null
           phone: string
+          priority?: string
+          problem_category?: string | null
           problem_type: string
           status?: string
           updated_at?: string
         }
         Update: {
           address?: string | null
+          admin_notes?: string | null
+          business_category?: string | null
+          call_status?: string
           created_at?: string
           details?: string | null
+          email?: string | null
+          follow_up_status?: string
           id?: string
+          interest_status?: string | null
+          labels?: string[]
+          lead_source?: string | null
+          meeting_date?: string | null
+          meeting_time?: string | null
           name?: string
+          next_followup_date?: string | null
           phone?: string
+          priority?: string
+          problem_category?: string | null
           problem_type?: string
           status?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      lead_activities: {
+        Row: {
+          appointment_id: string
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          type: string
+        }
+        Insert: {
+          appointment_id: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          type?: string
+        }
+        Update: {
+          appointment_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_settings: {
         Row: {

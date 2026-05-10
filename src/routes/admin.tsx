@@ -127,6 +127,26 @@ const TABS: { key: Tab; label: string; icon: React.ComponentType<{ className?: s
 
 function Dashboard() {
   const [tab, setTab] = useState<Tab>("appointments");
+  const [overview, setOverview] = useState({ total: 0, today: 0, videos: 0, pixelOn: false });
+
+  useEffect(() => {
+    (async () => {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const [{ count: total }, { count: todayCount }, { count: videos }, { data: pix }] = await Promise.all([
+        supabase.from("appointments").select("*", { count: "exact", head: true }),
+        supabase.from("appointments").select("*", { count: "exact", head: true }).gte("created_at", today.toISOString()),
+        (supabase as any).from("site_videos").select("*", { count: "exact", head: true }),
+        (supabase as any).from("site_settings").select("value").eq("key", "facebook_pixel_id").maybeSingle(),
+      ]);
+      setOverview({
+        total: total ?? 0,
+        today: todayCount ?? 0,
+        videos: videos ?? 0,
+        pixelOn: !!(pix?.value),
+      });
+    })();
+  }, [tab]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/40 via-background to-accent/20">
       <header className="border-b border-border/60 bg-card/70 backdrop-blur-xl sticky top-0 z-10">
@@ -140,9 +160,14 @@ function Dashboard() {
               <p className="text-xs text-muted-foreground">সম্পূর্ণ সাইট ম্যানেজমেন্ট</p>
             </div>
           </div>
-          <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 rounded-lg bg-card border border-border hover:border-destructive hover:text-destructive inline-flex items-center gap-2 text-sm transition">
-            <LogOut className="w-4 h-4" /> লগআউট
-          </button>
+          <div className="flex items-center gap-2">
+            <a href="/" target="_blank" rel="noreferrer" className="px-3 py-2 rounded-lg bg-card border border-border hover:border-primary inline-flex items-center gap-2 text-sm transition">
+              সাইট দেখুন ↗
+            </a>
+            <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 rounded-lg bg-card border border-border hover:border-destructive hover:text-destructive inline-flex items-center gap-2 text-sm transition">
+              <LogOut className="w-4 h-4" /> লগআউট
+            </button>
+          </div>
         </div>
         <div className="container mx-auto px-4 pb-3 flex gap-2 overflow-x-auto">
           {TABS.map(({ key, label, icon: Icon }) => (
@@ -153,6 +178,18 @@ function Dashboard() {
           ))}
         </div>
       </header>
+
+      <div className="container mx-auto px-4 pt-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="আজকের লিড" value={overview.today} tone="primary" />
+          <StatCard label="মোট অ্যাপয়েন্টমেন্ট" value={overview.total} tone="info" />
+          <StatCard label="মোট ভিডিও" value={overview.videos} tone="success" />
+          <div className={`rounded-2xl p-4 border border-border bg-gradient-to-br shadow-soft ${overview.pixelOn ? "from-emerald-500/15 to-emerald-500/5 text-emerald-700" : "from-muted to-muted/40 text-muted-foreground"}`}>
+            <div className="text-xs font-semibold opacity-80">FB Pixel</div>
+            <div className="text-2xl font-extrabold mt-1">{overview.pixelOn ? "সক্রিয়" : "নিষ্ক্রিয়"}</div>
+          </div>
+        </div>
+      </div>
 
       <main className="container mx-auto px-4 py-8">
         {tab === "appointments" && <AppointmentsTab />}

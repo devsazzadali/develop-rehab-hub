@@ -435,13 +435,27 @@ const SITE_FIELDS: { key: keyof SiteInfo; label: string; placeholder: string; mu
   { key: "shortName", label: "সংক্ষিপ্ত নাম", placeholder: "ডেভেলপ ফিজিওথেরাপি", group: "ব্র্যান্ড" },
   { key: "brandInitial", label: "লোগো অক্ষর", placeholder: "ডে", group: "ব্র্যান্ড" },
   { key: "footerTagline", label: "ফুটার ট্যাগলাইন", placeholder: "সংক্ষিপ্ত পরিচিতি...", multiline: true, group: "ব্র্যান্ড" },
-  { key: "phone", label: "ফোন (ডায়াল)", placeholder: "01952913188", group: "যোগাযোগ" },
-  { key: "phoneDisplay", label: "ফোন (প্রদর্শন)", placeholder: "০১৯৫২-৯১৩১৮৮", group: "যোগাযোগ" },
+
+  { key: "heroBadge", label: "হিরো ব্যাজ টেক্সট", placeholder: "রংপুরের #১ সেন্টার", group: "হিরো সেকশন" },
+  { key: "heroTitle", label: "হিরো প্রধান শিরোনাম", placeholder: "ব্যথামুক্ত জীবনের জন্য...", multiline: true, group: "হিরো সেকশন" },
+  { key: "heroSubtitle", label: "হিরো সাবটাইটেল", placeholder: "প্যারালাইসিস, PLID...", multiline: true, group: "হিরো সেকশন" },
+
+  { key: "phone", label: "প্রধান ফোন (ডায়াল)", placeholder: "01952913188", group: "যোগাযোগ" },
+  { key: "phoneDisplay", label: "প্রধান ফোন (প্রদর্শন)", placeholder: "০১৯৫২-৯১৩১৮৮", group: "যোগাযোগ" },
+  { key: "secondPhone", label: "দ্বিতীয় ফোন (ঐচ্ছিক)", placeholder: "01XXXXXXXXX", group: "যোগাযোগ" },
   { key: "whatsapp", label: "WhatsApp নাম্বার", placeholder: "8801952913188 (কান্ট্রি কোডসহ)", group: "যোগাযোগ" },
+  { key: "whatsappMessage", label: "WhatsApp ডিফল্ট মেসেজ", placeholder: "আমি অ্যাপয়েন্টমেন্ট নিতে চাই।", multiline: true, group: "যোগাযোগ" },
   { key: "email", label: "ইমেইল", placeholder: "you@example.com", group: "যোগাযোগ" },
   { key: "facebook", label: "Facebook পেজ লিংক", placeholder: "https://facebook.com/...", group: "যোগাযোগ" },
+  { key: "youtube", label: "YouTube চ্যানেল লিংক", placeholder: "https://youtube.com/@...", group: "যোগাযোগ" },
+
   { key: "address", label: "ঠিকানা", placeholder: "ধাপ মেডিকেল মোড়, রংপুর", group: "অবস্থান" },
+  { key: "hours", label: "খোলা থাকার সময়", placeholder: "সর্বদা খোলা / সকাল ৯টা - রাত ১০টা", group: "অবস্থান" },
   { key: "mapEmbed", label: "Google Map Embed URL", placeholder: "https://www.google.com/maps?q=...&output=embed", multiline: true, group: "অবস্থান" },
+
+  { key: "seoTitle", label: "SEO টাইটেল", placeholder: "৬০ অক্ষরের মধ্যে", group: "SEO" },
+  { key: "seoDescription", label: "SEO বিবরণ", placeholder: "১৬০ অক্ষরের মধ্যে", multiline: true, group: "SEO" },
+  { key: "ogImage", label: "Open Graph শেয়ার ইমেজ URL", placeholder: "https://...jpg (1200x630)", group: "SEO" },
 ];
 
 function SiteInfoTab() {

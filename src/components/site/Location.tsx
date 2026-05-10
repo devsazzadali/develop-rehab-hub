@@ -33,7 +33,7 @@ export function Location() {
                 <div>
                   <div className="font-bold text-foreground">ঠিকানা</div>
                   <div className="text-sm text-muted-foreground mt-1">{SITE.address}</div>
-                  <div className="text-xs text-muted-foreground mt-1">সর্বদা খোলা</div>
+                  <div className="text-xs text-muted-foreground mt-1">{SITE.hours}</div>
                 </div>
               </div>
             </div>

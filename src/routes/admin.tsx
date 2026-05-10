@@ -201,9 +201,20 @@ function Dashboard() {
   );
 }
 
+const STATUS_META: Record<string, { label: string; cls: string }> = {
+  new: { label: "নতুন", cls: "bg-blue-500/15 text-blue-700 border-blue-500/30" },
+  contacted: { label: "যোগাযোগ", cls: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
+  booked: { label: "বুকড", cls: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
+  done: { label: "সম্পন্ন", cls: "bg-muted text-muted-foreground border-border" },
+};
+
 function AppointmentsTab() {
   const [items, setItems] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<string>("all");
+  const [active, setActive] = useState<Appointment | null>(null);
+  const [waNumber, setWaNumber] = useState<string>("");
 
   const load = async () => {
     setLoading(true);
@@ -211,23 +222,81 @@ function AppointmentsTab() {
     if (error) toast.error(error.message); else setItems((data as Appointment[]) ?? []);
     setLoading(false);
   };
+
   useEffect(() => { load(); }, []);
+
+  // Realtime: new appointments appear instantly
+  useEffect(() => {
+    const ch = supabase
+      .channel("appointments-admin")
+      .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, (payload) => {
+        if (payload.eventType === "INSERT") {
+          setItems((prev) => [payload.new as Appointment, ...prev]);
+          toast.success(`নতুন অ্যাপয়েন্টমেন্ট: ${(payload.new as Appointment).name}`);
+        } else if (payload.eventType === "UPDATE") {
+          setItems((prev) => prev.map((i) => (i.id === (payload.new as Appointment).id ? (payload.new as Appointment) : i)));
+        } else if (payload.eventType === "DELETE") {
+          setItems((prev) => prev.filter((i) => i.id !== (payload.old as Appointment).id));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+
+  // Load WhatsApp number for quick action
+  useEffect(() => {
+    (supabase as any).from("site_settings").select("value").eq("key", "site_whatsapp").maybeSingle()
+      .then(({ data }: any) => setWaNumber(data?.value ?? ""));
+  }, []);
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("appointments").update({ status }).eq("id", id);
-    if (error) toast.error(error.message); else { toast.success("আপডেট হয়েছে"); load(); }
+    if (error) toast.error(error.message); else toast.success("আপডেট হয়েছে");
   };
   const remove = async (id: string) => {
     if (!confirm("নিশ্চিত মুছে ফেলতে চান?")) return;
     const { error } = await supabase.from("appointments").delete().eq("id", id);
-    if (error) toast.error(error.message); else { toast.success("মুছে ফেলা হয়েছে"); load(); }
+    if (error) toast.error(error.message); else { toast.success("মুছে ফেলা হয়েছে"); setActive(null); }
   };
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter((i) => {
+      if (filter !== "all" && i.status !== filter) return false;
+      if (!q) return true;
+      return (
+        i.name.toLowerCase().includes(q) ||
+        i.phone.toLowerCase().includes(q) ||
+        i.problem_type.toLowerCase().includes(q) ||
+        (i.address ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [items, query, filter]);
 
   const stats = {
     total: items.length,
     new: items.filter((i) => i.status === "new").length,
     booked: items.filter((i) => i.status === "booked").length,
     done: items.filter((i) => i.status === "done").length,
+  };
+
+  const exportCSV = () => {
+    const rows = [
+      ["Name", "Phone", "Problem", "Address", "Details", "Status", "Created"],
+      ...filtered.map((i) => [i.name, i.phone, i.problem_type, i.address ?? "", i.details ?? "", i.status, new Date(i.created_at).toISOString()]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `appointments-${Date.now()}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const waLink = (phone: string, name: string) => {
+    const num = (waNumber || phone).replace(/[^0-9]/g, "");
+    const msg = encodeURIComponent(`আসসালামু আলাইকুম ${name}, ডেভেলপ ফিজিওথেরাপি সেন্টার থেকে বলছি। আপনার অ্যাপয়েন্টমেন্টের ব্যাপারে যোগাযোগ করছি।`);
+    return `https://wa.me/${num}?text=${msg}`;
   };
 
   return (
@@ -238,49 +307,159 @@ function AppointmentsTab() {
         <StatCard label="বুকড" value={stats.booked} tone="success" />
         <StatCard label="সম্পন্ন" value={stats.done} tone="muted" />
       </div>
-      <div className="flex justify-end">
-        <button onClick={load} className="px-3 py-2 rounded-lg border border-border bg-card hover:bg-accent inline-flex items-center gap-2 text-sm">
-          <RefreshCw className="w-4 h-4" /> রিফ্রেশ
-        </button>
-      </div>
-      {loading ? (
-        <div className="grid place-items-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-      ) : items.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">কোনো অ্যাপয়েন্টমেন্ট পাওয়া যায়নি।</div>
-      ) : (
-        <div className="grid gap-4">
-          {items.map((a) => (
-            <div key={a.id} className="bg-card rounded-2xl p-5 border border-border shadow-soft">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="font-bold text-foreground">{a.name}</div>
-                  <a href={`tel:${a.phone}`} className="text-sm text-primary inline-flex items-center gap-1 mt-0.5">
-                    <Phone className="w-3 h-3" /> {a.phone}
-                  </a>
-                  <div className="text-xs text-muted-foreground mt-1">{new Date(a.created_at).toLocaleString("bn-BD")}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <select value={a.status} onChange={(e) => updateStatus(a.id, e.target.value)}
-                    className="text-xs rounded-lg border border-input bg-background px-2 py-1.5">
-                    <option value="new">নতুন</option>
-                    <option value="contacted">যোগাযোগ করা হয়েছে</option>
-                    <option value="booked">বুকড</option>
-                    <option value="done">সম্পন্ন</option>
-                  </select>
-                  <button onClick={() => remove(a.id)} className="p-2 rounded-lg text-destructive hover:bg-destructive/10">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-3 mt-4 text-sm">
-                <div><span className="text-muted-foreground">সমস্যা: </span>{a.problem_type}</div>
-                <div><span className="text-muted-foreground">ঠিকানা: </span>{a.address || "—"}</div>
-              </div>
-              {a.details && <div className="mt-3 text-sm bg-muted/50 rounded-lg p-3"><span className="text-muted-foreground">বিস্তারিত: </span>{a.details}</div>}
-            </div>
-          ))}
+
+      <div className="bg-card rounded-2xl border border-border shadow-soft overflow-hidden">
+        <div className="p-4 border-b border-border flex flex-wrap items-center gap-3 bg-gradient-to-r from-card to-secondary/30">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="নাম, ফোন, সমস্যা দিয়ে খুঁজুন..."
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-input bg-background text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            {(["all", "new", "contacted", "booked", "done"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setFilter(s)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${filter === s ? "gradient-primary text-primary-foreground border-transparent shadow-soft" : "bg-background border-border text-foreground hover:border-primary"}`}
+              >
+                {s === "all" ? "সব" : STATUS_META[s].label}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={exportCSV} className="px-3 py-2 rounded-lg border border-border bg-background hover:border-primary inline-flex items-center gap-2 text-sm font-medium">
+              <Download className="w-4 h-4" /> CSV
+            </button>
+            <button onClick={load} className="px-3 py-2 rounded-lg border border-border bg-background hover:border-primary inline-flex items-center gap-2 text-sm">
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      )}
+
+        {loading ? (
+          <div className="grid place-items-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20 text-muted-foreground">কোনো অ্যাপয়েন্টমেন্ট পাওয়া যায়নি।</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="text-left px-4 py-3 font-semibold">রোগী</th>
+                  <th className="text-left px-4 py-3 font-semibold">যোগাযোগ</th>
+                  <th className="text-left px-4 py-3 font-semibold">সমস্যা</th>
+                  <th className="text-left px-4 py-3 font-semibold">তারিখ</th>
+                  <th className="text-left px-4 py-3 font-semibold">স্ট্যাটাস</th>
+                  <th className="text-right px-4 py-3 font-semibold">অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((a) => {
+                  const meta = STATUS_META[a.status] ?? STATUS_META.new;
+                  return (
+                    <tr key={a.id} className="border-t border-border hover:bg-secondary/30 transition cursor-pointer" onClick={() => setActive(a)}>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-foreground">{a.name}</div>
+                        {a.address && <div className="text-xs text-muted-foreground inline-flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{a.address}</div>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <a href={`tel:${a.phone}`} onClick={(e) => e.stopPropagation()} className="text-primary font-medium inline-flex items-center gap-1">
+                          <Phone className="w-3 h-3" /> {a.phone}
+                        </a>
+                      </td>
+                      <td className="px-4 py-3 max-w-[220px] truncate text-foreground">{a.problem_type}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(a.created_at).toLocaleString("bn-BD", { dateStyle: "medium", timeStyle: "short" })}</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <select value={a.status} onChange={(e) => updateStatus(a.id, e.target.value)}
+                          className={`text-xs rounded-lg border px-2 py-1 font-semibold ${meta.cls}`}>
+                          <option value="new">নতুন</option>
+                          <option value="contacted">যোগাযোগ</option>
+                          <option value="booked">বুকড</option>
+                          <option value="done">সম্পন্ন</option>
+                        </select>
+                      </td>
+                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="inline-flex gap-1">
+                          <a href={`tel:${a.phone}`} className="p-1.5 rounded-lg hover:bg-primary/10 text-primary" title="কল"><Phone className="w-4 h-4" /></a>
+                          <a href={waLink(a.phone, a.name)} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-600" title="WhatsApp"><MessageCircle className="w-4 h-4" /></a>
+                          <button onClick={() => remove(a.id)} className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10" title="মুছুন"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {active && <AppointmentDrawer item={active} onClose={() => setActive(null)} onStatus={(s) => updateStatus(active.id, s)} onDelete={() => remove(active.id)} waLink={waLink} />}
+    </div>
+  );
+}
+
+function AppointmentDrawer({ item, onClose, onStatus, onDelete, waLink }: {
+  item: Appointment; onClose: () => void; onStatus: (s: string) => void; onDelete: () => void;
+  waLink: (phone: string, name: string) => string;
+}) {
+  const meta = STATUS_META[item.status] ?? STATUS_META.new;
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
+      <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-md h-full bg-card border-l border-border shadow-elegant overflow-y-auto animate-in slide-in-from-right">
+        <div className="sticky top-0 bg-card/90 backdrop-blur-xl border-b border-border p-4 flex items-center justify-between">
+          <div>
+            <div className="text-xs text-muted-foreground">অ্যাপয়েন্টমেন্ট বিবরণ</div>
+            <div className="font-bold text-lg text-foreground">{item.name}</div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="p-5 space-y-5">
+          <div className={`inline-flex px-3 py-1 rounded-full text-xs font-bold border ${meta.cls}`}>{meta.label}</div>
+
+          <div className="grid gap-3">
+            <DetailRow label="ফোন" value={<a href={`tel:${item.phone}`} className="text-primary font-semibold">{item.phone}</a>} />
+            <DetailRow label="সমস্যা" value={item.problem_type} />
+            <DetailRow label="ঠিকানা" value={item.address || "—"} />
+            <DetailRow label="বিস্তারিত" value={item.details || "—"} />
+            <DetailRow label="জমা দেয়ার সময়" value={new Date(item.created_at).toLocaleString("bn-BD", { dateStyle: "full", timeStyle: "short" })} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <a href={`tel:${item.phone}`} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2"><Phone className="w-4 h-4" /> কল</a>
+            <a href={waLink(item.phone, item.name)} target="_blank" rel="noreferrer" className="px-4 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold inline-flex items-center justify-center gap-2"><MessageCircle className="w-4 h-4" /> WhatsApp</a>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-foreground mb-2">স্ট্যাটাস পরিবর্তন</div>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(STATUS_META).map(([k, v]) => (
+                <button key={k} onClick={() => onStatus(k)} className={`px-3 py-2 rounded-lg text-sm font-semibold border transition ${item.status === k ? v.cls : "bg-background border-border hover:border-primary"}`}>
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button onClick={onDelete} className="w-full px-4 py-2.5 rounded-xl border border-destructive/40 text-destructive hover:bg-destructive/10 font-semibold inline-flex items-center justify-center gap-2">
+            <Trash2 className="w-4 h-4" /> মুছে ফেলুন
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-3 gap-3 py-2 border-b border-border/60">
+      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</div>
+      <div className="col-span-2 text-sm text-foreground break-words">{value}</div>
     </div>
   );
 }

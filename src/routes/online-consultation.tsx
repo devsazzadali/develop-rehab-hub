@@ -208,14 +208,14 @@ function OnlineConsultationPage() {
                         </li>
                       ))}
                     </ul>
-                    <a href={`${waLink}%20-%20${encodeURIComponent(p.name)}`} target="_blank" rel="noreferrer"
+                    <Link to="/payment" search={{ package: p.id }}
                       className={`mt-7 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-bold transition ${
                         p.is_popular
                           ? "gradient-primary text-primary-foreground shadow-elegant hover:opacity-95"
                           : "bg-foreground text-background hover:opacity-90"
                       }`}>
-                      <MessageCircle className="w-4 h-4" /> {p.cta_label || "বুক করুন"}
-                    </a>
+                      <Wallet className="w-4 h-4" /> {p.cta_label || "বুক করুন"}
+                    </Link>
                   </motion.div>
                 ))}
               </div>

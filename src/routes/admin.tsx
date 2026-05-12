@@ -11,6 +11,8 @@ import { INFO_KEY_MAP, type SiteInfo } from "@/lib/use-site-data";
 import { OnlineConsultationTab } from "@/components/admin/OnlineConsultationTab";
 import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { UsersTab } from "@/components/admin/UsersTab";
+import { ReviewsTab } from "@/components/admin/ReviewsTab";
+import { SchedulesTab } from "@/components/admin/SchedulesTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({

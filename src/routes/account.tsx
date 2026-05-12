@@ -203,10 +203,13 @@ function Row({ icon: Icon, k, v }: { icon: any; k: string; v: string }) {
 }
 
 function LoginPrompt() {
-  const [mode, setMode] = useState<"login" | "reset">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true);
     try {
@@ -214,6 +217,22 @@ function LoginPrompt() {
         const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/account` });
         if (error) throw error;
         toast.success("রিসেট লিংক পাঠানো হয়েছে");
+      } else if (mode === "signup") {
+        if (password.length < 6) throw new Error("পাসওয়ার্ড ৬+ অক্ষর হতে হবে");
+        if (name.trim().length < 2) throw new Error("আপনার নাম দিন");
+        if (phone.trim().length < 10) throw new Error("সঠিক ফোন নম্বর দিন");
+        const { data, error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { name, phone }, emailRedirectTo: `${window.location.origin}/account` },
+        });
+        if (error) throw error;
+        if (data.user) {
+          await sb.from("profiles").upsert({
+            user_id: data.user.id,
+            name, email, phone,
+          }, { onConflict: "user_id" });
+        }
+        toast.success("অ্যাকাউন্ট তৈরি হয়েছে! লগইন হচ্ছে...");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -221,27 +240,59 @@ function LoginPrompt() {
     } catch (e: any) { toast.error(e.message); }
     finally { setBusy(false); }
   };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16 px-4">
-        <form onSubmit={submit} className="max-w-md mx-auto bg-card border border-border rounded-3xl p-8 shadow-elegant space-y-4">
-          <h1 className="text-2xl font-bold">আপনার অ্যাকাউন্টে লগইন</h1>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ইমেইল"
-            className="w-full rounded-xl border border-input bg-background px-4 py-3" />
-          {mode === "login" && (
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="পাসওয়ার্ড"
+        <div className="max-w-md mx-auto">
+          <div className="grid grid-cols-2 gap-2 p-1 bg-card border border-border rounded-full mb-4">
+            <button type="button" onClick={() => setMode("login")}
+              className={`py-2 rounded-full text-sm font-bold transition ${mode === "login" ? "gradient-primary text-primary-foreground shadow-elegant" : "text-foreground/70"}`}>
+              সাইন ইন
+            </button>
+            <button type="button" onClick={() => setMode("signup")}
+              className={`py-2 rounded-full text-sm font-bold transition ${mode === "signup" ? "gradient-primary text-primary-foreground shadow-elegant" : "text-foreground/70"}`}>
+              সাইন আপ
+            </button>
+          </div>
+
+          <form onSubmit={submit} className="bg-card border border-border rounded-3xl p-8 shadow-elegant space-y-4">
+            <h1 className="text-2xl font-bold">
+              {mode === "login" ? "আপনার অ্যাকাউন্টে লগইন" : mode === "signup" ? "নতুন অ্যাকাউন্ট তৈরি করুন" : "পাসওয়ার্ড রিসেট"}
+            </h1>
+            {mode === "signup" && (
+              <>
+                <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="পূর্ণ নাম"
+                  className="w-full rounded-xl border border-input bg-background px-4 py-3" />
+                <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="ফোন নম্বর"
+                  className="w-full rounded-xl border border-input bg-background px-4 py-3" />
+              </>
+            )}
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ইমেইল"
               className="w-full rounded-xl border border-input bg-background px-4 py-3" />
-          )}
-          <button disabled={busy} className="w-full py-3 rounded-xl gradient-primary text-primary-foreground font-bold disabled:opacity-70">
-            {mode === "login" ? "লগইন" : "রিসেট লিংক পাঠান"}
-          </button>
-          <button type="button" onClick={() => setMode(mode === "login" ? "reset" : "login")} className="text-sm text-primary w-full">
-            {mode === "login" ? "পাসওয়ার্ড ভুলে গেছেন?" : "← লগইনে ফিরে যান"}
-          </button>
-        </form>
+            {mode !== "reset" && (
+              <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="পাসওয়ার্ড (৬+)"
+                className="w-full rounded-xl border border-input bg-background px-4 py-3" />
+            )}
+            <button disabled={busy} className="w-full py-3 rounded-xl gradient-primary text-primary-foreground font-bold disabled:opacity-70">
+              {busy ? "..." : mode === "login" ? "লগইন" : mode === "signup" ? "অ্যাকাউন্ট তৈরি করুন" : "রিসেট লিংক পাঠান"}
+            </button>
+            {mode === "login" && (
+              <button type="button" onClick={() => setMode("reset")} className="text-sm text-primary w-full">
+                পাসওয়ার্ড ভুলে গেছেন?
+              </button>
+            )}
+            {mode === "reset" && (
+              <button type="button" onClick={() => setMode("login")} className="text-sm text-primary w-full">
+                ← লগইনে ফিরে যান
+              </button>
+            )}
+          </form>
+        </div>
       </div>
       <Footer />
     </div>
   );
 }
+

@@ -86,13 +86,20 @@ export function Navbar() {
             {links.map((l) => (
               <a
                 key={l.href}
-                href={l.href}
+                href={`/${l.href}`}
                 onClick={() => setOpen(false)}
                 className="py-2 text-foreground/90 font-medium"
               >
                 {l.label}
               </a>
             ))}
+            <Link
+              to="/online-consultation"
+              onClick={() => setOpen(false)}
+              className="py-2 font-bold text-primary"
+            >
+              অনলাইন কনসালটেশন
+            </Link>
             <a
               href={`tel:${SITE.phone}`}
               className="sm:hidden inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full gradient-primary text-primary-foreground font-semibold"

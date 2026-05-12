@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE } from "@/lib/site-config";
 
+export type SiteVideoType = "hero" | "review" | "consultancy";
+
 export type SiteVideo = {
   id: string;
   video_id: string;
   title: string;
-  type: "hero" | "review";
+  type: SiteVideoType;
   sort_order: number;
 };
 
-export function useSiteVideos(type: "hero" | "review") {
+export function useSiteVideos(type: SiteVideoType) {
   const [videos, setVideos] = useState<SiteVideo[]>([]);
   const [loading, setLoading] = useState(true);
 

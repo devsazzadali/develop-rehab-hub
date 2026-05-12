@@ -119,6 +119,13 @@ function ThankYouPage() {
                 )}
               </div>
 
+              {/* Schedule meeting (only after admin confirms payment) */}
+              {item.status === "confirmed" && (
+                <div className="mt-6">
+                  <ScheduleMeeting paymentId={item.id} customerName={item.customer_name} />
+                </div>
+              )}
+
               {/* Emergency contact */}
               <div className="mt-6 bg-gradient-to-br from-emerald-500/5 to-primary/5 border border-emerald-500/20 rounded-2xl p-6">
                 <h3 className="font-bold text-lg flex items-center gap-2">

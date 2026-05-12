@@ -49,12 +49,18 @@ export function Navbar() {
           {links.map((l) => (
             <a
               key={l.href}
-              href={l.href}
+              href={`/${l.href}`}
               className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
             >
               {l.label}
             </a>
           ))}
+          <Link
+            to="/online-consultation"
+            className="text-sm font-bold text-primary hover:opacity-80 transition-colors"
+          >
+            অনলাইন কনসালটেশন
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -80,13 +86,20 @@ export function Navbar() {
             {links.map((l) => (
               <a
                 key={l.href}
-                href={l.href}
+                href={`/${l.href}`}
                 onClick={() => setOpen(false)}
                 className="py-2 text-foreground/90 font-medium"
               >
                 {l.label}
               </a>
             ))}
+            <Link
+              to="/online-consultation"
+              onClick={() => setOpen(false)}
+              className="py-2 font-bold text-primary"
+            >
+              অনলাইন কনসালটেশন
+            </Link>
             <a
               href={`tel:${SITE.phone}`}
               className="sm:hidden inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full gradient-primary text-primary-foreground font-semibold"

@@ -8,6 +8,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { INFO_KEY_MAP, type SiteInfo } from "@/lib/use-site-data";
+import { OnlineConsultationTab } from "@/components/admin/OnlineConsultationTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -172,7 +173,7 @@ VALUES ('${userId}', 'admin');`}</pre>
 }
 
 // ---------- CRM Shell with sidebar ----------
-type NavKey = "overview" | "leads" | "followups" | "categories" | "analytics" | "activity" | "videos" | "site" | "tracking";
+type NavKey = "overview" | "leads" | "followups" | "categories" | "analytics" | "activity" | "online" | "videos" | "site" | "tracking";
 
 const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?: string }>; group: string }[] = [
   { key: "overview",   label: "Dashboard",      icon: LayoutDashboard, group: "CRM" },
@@ -181,6 +182,7 @@ const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?:
   { key: "categories", label: "Categories",     icon: Tag,             group: "CRM" },
   { key: "analytics",  label: "Analytics",      icon: BarChart3,       group: "CRM" },
   { key: "activity",   label: "Activity Log",   icon: FileText,        group: "CRM" },
+  { key: "online",     label: "Online Consult", icon: Video,           group: "Site" },
   { key: "videos",     label: "Videos",         icon: Video,           group: "Site" },
   { key: "site",       label: "Site Info",      icon: Settings2,       group: "Site" },
   { key: "tracking",   label: "Pixel / GTM",    icon: Sparkles,        group: "Site" },
@@ -280,6 +282,7 @@ function CRMShell() {
           {view === "categories" && <CategoriesView leads={leads} />}
           {view === "analytics" && <AnalyticsView leads={leads} />}
           {view === "activity" && <ActivityView />}
+          {view === "online" && <OnlineConsultationTab />}
           {view === "videos" && <VideosTab />}
           {view === "site" && <SiteInfoTab />}
           {view === "tracking" && <TrackingTab />}

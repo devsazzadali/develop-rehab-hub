@@ -20,26 +20,37 @@ function AccountPage() {
   const [profile, setProfile] = useState<any>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [schedules, setSchedules] = useState<any[]>([]);
   const [savingPwd, setSavingPwd] = useState(false);
   const [newPwd, setNewPwd] = useState("");
+  const [, setNow] = useState(Date.now());
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); setLoading(false); });
-    return () => sub.subscription.unsubscribe();
+    const t = setInterval(() => setNow(Date.now()), 30_000);
+    return () => { sub.subscription.unsubscribe(); clearInterval(t); };
   }, []);
+
+  const reloadAll = (uid: string) => {
+    Promise.all([
+      sb.from("profiles").select("*").eq("user_id", uid).maybeSingle(),
+      sb.from("appointments").select("*").eq("user_id", uid).order("created_at", { ascending: false }),
+      sb.from("payment_submissions").select("*").eq("user_id", uid).order("created_at", { ascending: false }),
+      sb.from("consultation_schedules").select("*").eq("user_id", uid).order("scheduled_at", { ascending: true }),
+    ]).then(([p, a, pay, sch]: any[]) => {
+      setProfile(p.data); setAppointments(a.data ?? []); setPayments(pay.data ?? []); setSchedules(sch.data ?? []);
+    });
+  };
 
   useEffect(() => {
     if (!session) return;
-    Promise.all([
-      sb.from("profiles").select("*").eq("user_id", session.user.id).maybeSingle(),
-      sb.from("appointments").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false }),
-      sb.from("payment_submissions").select("*").eq("user_id", session.user.id).order("created_at", { ascending: false }),
-    ]).then(([p, a, pay]: any[]) => {
-      setProfile(p.data);
-      setAppointments(a.data ?? []);
-      setPayments(pay.data ?? []);
-    });
+    reloadAll(session.user.id);
+    const ch = sb.channel("account-schedules-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "consultation_schedules", filter: `user_id=eq.${session.user.id}` },
+        () => reloadAll(session.user.id))
+      .subscribe();
+    return () => { sb.removeChannel(ch); };
   }, [session]);
 
   if (loading) return <div className="min-h-screen grid place-items-center"><Loader2 className="w-7 h-7 animate-spin text-primary" /></div>;

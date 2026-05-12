@@ -93,18 +93,30 @@ export const adminListUsers = createServerFn({ method: "GET" })
       .maybeSingle();
     if (!roleRow) throw new Error("Forbidden");
 
-    const { data: profiles } = await supabaseAdmin
-      .from("profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [{ data: profiles }, { data: usersList }] = await Promise.all([
+      supabaseAdmin.from("profiles").select("*").order("created_at", { ascending: false }),
+      supabaseAdmin.auth.admin.listUsers({ perPage: 1000 }),
+    ]);
 
-    const { data: usersList } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
-    const emailMap = new Map(usersList?.users.map((u) => [u.id, u.email]) ?? []);
-    const lastSignInMap = new Map(usersList?.users.map((u) => [u.id, u.last_sign_in_at]) ?? []);
+    const profileMap = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
+    const merged = (usersList?.users ?? []).map((u) => {
+      const p: any = profileMap.get(u.id);
+      return {
+        user_id: u.id,
+        name: p?.name || u.user_metadata?.name || u.email?.split("@")[0] || "—",
+        email: p?.email || u.email || "",
+        phone: p?.phone || u.user_metadata?.phone || "",
+        address: p?.address || null,
+        problem_type: p?.problem_type || null,
+        details: p?.details || null,
+        created_at: p?.created_at || u.created_at,
+        auth_email: u.email,
+        last_sign_in_at: u.last_sign_in_at || null,
+        has_profile: !!p,
+      };
+    });
 
-    return (profiles ?? []).map((p: any) => ({
-      ...p,
-      auth_email: emailMap.get(p.user_id) || p.email,
-      last_sign_in_at: lastSignInMap.get(p.user_id) || null,
-    }));
+    // Sort newest first
+    merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return merged;
   });

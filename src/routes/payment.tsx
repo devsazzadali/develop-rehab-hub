@@ -117,6 +117,10 @@ function PaymentPage() {
         screenshot_url = path;
       }
 
+      // Attach logged-in user so they can see status updates and self-schedule
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData.session?.user.id ?? null;
+
       const { data, error } = await sb.from("payment_submissions").insert({
         package_id: selectedPkg?.id ?? null,
         payment_method_id: selectedMethod.id,
@@ -130,6 +134,7 @@ function PaymentPage() {
         transaction_id: form.transaction_id,
         note: form.note || null,
         screenshot_url,
+        user_id: uid,
       }).select("id").single();
 
       if (error) { toast.error(error.message); setSubmitting(false); return; }

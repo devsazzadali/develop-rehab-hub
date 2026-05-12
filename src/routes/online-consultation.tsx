@@ -10,7 +10,8 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { FloatingButtons } from "@/components/site/FloatingButtons";
 import { useOnlineData } from "@/lib/use-online-data";
-import { useSiteInfo, waLinkFor } from "@/lib/use-site-data";
+import { useSiteInfo, useSiteVideos, waLinkFor } from "@/lib/use-site-data";
+import { Play } from "lucide-react";
 
 export const Route = createFileRoute("/online-consultation")({
   head: () => ({
@@ -31,6 +32,9 @@ export const Route = createFileRoute("/online-consultation")({
 function OnlineConsultationPage() {
   const { packages, faqs, content, loading } = useOnlineData();
   const SITE = useSiteInfo();
+  const { videos: consultVideos } = useSiteVideos("consultancy");
+  const heroVideo = consultVideos[0];
+  const [showVideo, setShowVideo] = useState(false);
   const waMsg = content.online_whatsapp_message || "আমি অনলাইন কনসালটেশন নিতে চাই।";
   const waLink = waLinkFor(SITE.whatsapp, waMsg);
 
@@ -81,18 +85,55 @@ function OnlineConsultationPage() {
 
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.1 }} className="relative">
               <div className="relative rounded-3xl overflow-hidden shadow-elegant border border-border bg-card aspect-[4/5]">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30" />
-                <div className="absolute inset-0 grid place-items-center">
-                  <div className="w-32 h-32 rounded-full bg-white/95 grid place-items-center shadow-2xl">
-                    <Video className="w-14 h-14 text-primary" />
-                  </div>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                    <div className="text-sm font-semibold text-slate-900">লাইভ কনসালটেশন চলছে</div>
-                  </div>
-                </div>
+                {heroVideo && showVideo ? (
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src={`https://www.youtube.com/embed/${heroVideo.video_id}?autoplay=1`}
+                    title={heroVideo.title || "Consultation video"}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                  />
+                ) : heroVideo ? (
+                  <>
+                    <img
+                      src={`https://i.ytimg.com/vi/${heroVideo.video_id}/hqdefault.jpg`}
+                      alt={heroVideo.title || "Consultation video"}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+                    <button
+                      onClick={() => setShowVideo(true)}
+                      className="absolute inset-0 grid place-items-center group"
+                      aria-label="ভিডিও চালান"
+                    >
+                      <span className="w-20 h-20 rounded-full bg-white/95 grid place-items-center text-primary shadow-2xl group-hover:scale-110 transition-transform">
+                        <Play className="w-8 h-8 fill-current ml-1" />
+                      </span>
+                    </button>
+                    {heroVideo.title && (
+                      <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg">
+                        <div className="text-xs text-muted-foreground">পরিচিতি ভিডিও</div>
+                        <div className="text-sm font-semibold text-slate-900 truncate">{heroVideo.title}</div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30" />
+                    <div className="absolute inset-0 grid place-items-center">
+                      <div className="w-32 h-32 rounded-full bg-white/95 grid place-items-center shadow-2xl">
+                        <Video className="w-14 h-14 text-primary" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                        <div className="text-sm font-semibold text-slate-900">লাইভ কনসালটেশন চলছে</div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>

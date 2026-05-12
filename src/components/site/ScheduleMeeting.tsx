@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Clock, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { CalendarDays, Clock, Loader2, CheckCircle2, AlertCircle, Video, Radio } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -74,39 +74,54 @@ export function ScheduleMeeting({
   const [existing, setExisting] = useState<Existing | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(true);
 
-  // Check if this payment already has a booking
+  // Check if this payment already has a booking + realtime updates
   useEffect(() => {
     let active = true;
-    sb.from("consultation_schedules")
-      .select("scheduled_at, meet_link, status")
-      .eq("payment_submission_id", paymentId)
-      .maybeSingle()
-      .then(({ data }: any) => {
-        if (!active) return;
-        setExisting(data as Existing | null);
-        setLoadingExisting(false);
-      });
+    const load = () => {
+      sb.from("consultation_schedules")
+        .select("scheduled_at, meet_link, status")
+        .eq("payment_submission_id", paymentId)
+        .maybeSingle()
+        .then(({ data }: any) => {
+          if (!active) return;
+          setExisting(data as Existing | null);
+          setLoadingExisting(false);
+        });
+    };
+    load();
+    const ch = sb.channel(`sched-${paymentId}`)
+      .on("postgres_changes",
+        { event: "*", schema: "public", table: "consultation_schedules", filter: `payment_submission_id=eq.${paymentId}` },
+        () => load())
+      .subscribe();
     return () => {
       active = false;
+      sb.removeChannel(ch);
     };
   }, [paymentId]);
 
-  // Load taken slots for selected date
+  // Load taken slots for selected date + realtime refresh
   useEffect(() => {
     if (!date || existing) return;
     setLoadingSlots(true);
     setPicked(null);
-    sb.rpc("get_booked_slots", { _date: date }).then(({ data }: any) => {
-      const set = new Set<string>();
-      (data as { scheduled_at: string }[] | null)?.forEach((r) => {
-        const d = new Date(r.scheduled_at);
-        // convert to Asia/Dhaka HH:mm
-        const dhaka = new Date(d.getTime() + 6 * 3600 * 1000);
-        set.add(`${String(dhaka.getUTCHours()).padStart(2, "0")}:${String(dhaka.getUTCMinutes()).padStart(2, "0")}`);
+    const load = () => {
+      sb.rpc("get_booked_slots", { _date: date }).then(({ data }: any) => {
+        const set = new Set<string>();
+        (data as { scheduled_at: string }[] | null)?.forEach((r) => {
+          const d = new Date(r.scheduled_at);
+          const dhaka = new Date(d.getTime() + 6 * 3600 * 1000);
+          set.add(`${String(dhaka.getUTCHours()).padStart(2, "0")}:${String(dhaka.getUTCMinutes()).padStart(2, "0")}`);
+        });
+        setTaken(set);
+        setLoadingSlots(false);
       });
-      setTaken(set);
-      setLoadingSlots(false);
-    });
+    };
+    load();
+    const ch = sb.channel(`slots-${date}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "consultation_schedules" }, () => load())
+      .subscribe();
+    return () => { sb.removeChannel(ch); };
   }, [date, existing]);
 
   const submit = async () => {
@@ -147,8 +162,16 @@ export function ScheduleMeeting({
 
   if (existing) {
     const d = new Date(existing.scheduled_at);
+    const isLive = existing.status === "scheduled" || existing.status === "confirmed";
     return (
-      <div className="bg-gradient-to-br from-emerald-500/10 to-primary/5 border-2 border-emerald-500/30 rounded-2xl p-6">
+      <div className="bg-gradient-to-br from-emerald-500/10 to-primary/5 border-2 border-emerald-500/30 rounded-2xl p-6 relative">
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          Live
+        </div>
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 rounded-full bg-emerald-500 text-white grid place-items-center shrink-0">
             <CheckCircle2 className="w-6 h-6" />
@@ -170,15 +193,27 @@ export function ScheduleMeeting({
                 </div>
               </div>
             </div>
-            {existing.meet_link && (
-              <a
-                href={existing.meet_link}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl gradient-primary text-primary-foreground font-bold text-sm"
-              >
-                মিটিং লিংকে যোগ দিন →
-              </a>
+
+            {/* Meet link block — updates live when admin sets it */}
+            <div className={`mt-4 rounded-xl p-3 border-2 ${existing.meet_link ? "border-emerald-500/40 bg-emerald-500/5" : "border-amber-500/40 bg-amber-500/5"}`}>
+              <div className="flex items-center gap-2 text-xs font-bold">
+                <Video className={`w-4 h-4 ${existing.meet_link ? "text-emerald-600" : "text-amber-600"}`} />
+                {existing.meet_link ? "মিটিং লিংক প্রস্তুত" : "মিটিং লিংক শীঘ্রই যোগ হবে"}
+              </div>
+              {existing.meet_link ? (
+                <a href={existing.meet_link} target="_blank" rel="noreferrer"
+                  className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl gradient-primary text-primary-foreground font-bold text-sm">
+                  মিটিং লিংকে যোগ দিন →
+                </a>
+              ) : (
+                <p className="mt-1 text-xs text-muted-foreground">অ্যাডমিন লিংক যোগ করার সাথে সাথে এখানে রিয়েল-টাইমে দেখা যাবে।</p>
+              )}
+            </div>
+
+            {isLive && (
+              <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Radio className="w-3 h-3" /> স্ট্যাটাস: <span className="font-bold text-foreground">{existing.status}</span>
+              </div>
             )}
           </div>
         </div>

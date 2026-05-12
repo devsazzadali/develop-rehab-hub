@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Loader2, CheckCircle2, X, Phone, Hash, Mail, Clock, Eye } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, CheckCircle2, X, Phone, Hash, Mail, Clock, Eye, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ScheduleMeetingDialog } from "./ScheduleMeetingDialog";
 
 const sb: any = supabase;
 
@@ -17,6 +18,7 @@ type Submission = {
   sender_number: string; transaction_id: string; note: string | null;
   status: string; admin_notes: string | null; confirmed_at: string | null;
   screenshot_url: string | null;
+  user_id: string | null;
   created_at: string;
 };
 
@@ -149,6 +151,7 @@ function SubmissionDrawer({ item, onClose, reload }: { item: Submission; onClose
   const [adminNotes, setAdminNotes] = useState(item.admin_notes || "");
   const [busy, setBusy] = useState(false);
   const [shotUrl, setShotUrl] = useState<string | null>(null);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   useEffect(() => {
     if (!item.screenshot_url) return;
@@ -233,11 +236,20 @@ function SubmissionDrawer({ item, onClose, reload }: { item: Submission; onClose
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border font-semibold disabled:opacity-70">
             <Clock className="w-4 h-4" /> Mark Pending
           </button>
+          {item.status === "confirmed" && (
+            <button onClick={() => setShowSchedule(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg gradient-primary text-primary-foreground font-semibold">
+              <Calendar className="w-4 h-4" /> Schedule Meeting
+            </button>
+          )}
           <button onClick={del} className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-destructive/10 text-destructive font-semibold">
             <Trash2 className="w-4 h-4" /> Delete
           </button>
         </div>
       </div>
+      {showSchedule && (
+        <ScheduleMeetingDialog paymentSubmission={item} onClose={() => setShowSchedule(false)} onSaved={reload} />
+      )}
     </div>
   );
 }

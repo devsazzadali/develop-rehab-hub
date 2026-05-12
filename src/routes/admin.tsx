@@ -11,6 +11,8 @@ import { INFO_KEY_MAP, type SiteInfo } from "@/lib/use-site-data";
 import { OnlineConsultationTab } from "@/components/admin/OnlineConsultationTab";
 import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { UsersTab } from "@/components/admin/UsersTab";
+import { ReviewsTab } from "@/components/admin/ReviewsTab";
+import { SchedulesTab } from "@/components/admin/SchedulesTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -53,7 +55,7 @@ type Activity = {
   created_at: string;
 };
 
-type SiteVideo = { id: string; video_id: string; title: string; type: "hero" | "review"; sort_order: number };
+type SiteVideo = { id: string; video_id: string; title: string; type: "hero" | "review" | "consultancy"; sort_order: number };
 
 const sb: any = supabase;
 
@@ -175,7 +177,7 @@ VALUES ('${userId}', 'admin');`}</pre>
 }
 
 // ---------- CRM Shell with sidebar ----------
-type NavKey = "overview" | "leads" | "followups" | "categories" | "analytics" | "activity" | "payments" | "users" | "online" | "videos" | "site" | "tracking";
+type NavKey = "overview" | "leads" | "followups" | "categories" | "analytics" | "activity" | "payments" | "schedules" | "users" | "online" | "videos" | "reviews" | "site" | "tracking";
 
 const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?: string }>; group: string }[] = [
   { key: "overview",   label: "Dashboard",      icon: LayoutDashboard, group: "CRM" },
@@ -185,9 +187,11 @@ const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?:
   { key: "analytics",  label: "Analytics",      icon: BarChart3,       group: "CRM" },
   { key: "activity",   label: "Activity Log",   icon: FileText,        group: "CRM" },
   { key: "payments",   label: "Payments",       icon: Wallet,          group: "CRM" },
+  { key: "schedules",  label: "Meetings",       icon: CalendarDays,    group: "CRM" },
   { key: "users",      label: "Users",          icon: UserCheck,       group: "CRM" },
   { key: "online",     label: "Online Consult", icon: Video,           group: "Site" },
   { key: "videos",     label: "Videos",         icon: Video,           group: "Site" },
+  { key: "reviews",    label: "Reviews",        icon: Star,            group: "Site" },
   { key: "site",       label: "Site Info",      icon: Settings2,       group: "Site" },
   { key: "tracking",   label: "Pixel / GTM",    icon: Sparkles,        group: "Site" },
 ];
@@ -287,9 +291,11 @@ function CRMShell() {
           {view === "analytics" && <AnalyticsView leads={leads} />}
           {view === "activity" && <ActivityView />}
           {view === "payments" && <PaymentsTab />}
+          {view === "schedules" && <SchedulesTab />}
           {view === "users" && <UsersTab />}
           {view === "online" && <OnlineConsultationTab />}
           {view === "videos" && <VideosTab />}
+          {view === "reviews" && <ReviewsTab />}
           {view === "site" && <SiteInfoTab />}
           {view === "tracking" && <TrackingTab />}
         </main>
@@ -1110,7 +1116,7 @@ function extractYouTubeId(input: string): string {
 function VideosTab() {
   const [items, setItems] = useState<SiteVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [type, setType] = useState<"hero" | "review">("review");
+  const [type, setType] = useState<"hero" | "review" | "consultancy">("review");
   const [videoId, setVideoId] = useState("");
   const [title, setTitle] = useState("");
   const load = async () => {
@@ -1145,6 +1151,7 @@ function VideosTab() {
         <div className="grid md:grid-cols-3 gap-3">
           <select value={type} onChange={(e) => setType(e.target.value as any)} className="rounded-xl border border-input bg-background px-3 py-2.5">
             <option value="review">Review video</option>
+            <option value="consultancy">Online Consultancy</option>
             <option value="hero">Hero (intro)</option>
           </select>
           <input value={videoId} onChange={(e) => setVideoId(e.target.value)} placeholder="YouTube URL or ID" className="rounded-xl border border-input bg-background px-3 py-2.5" />

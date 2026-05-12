@@ -53,7 +53,7 @@ type Activity = {
   created_at: string;
 };
 
-type SiteVideo = { id: string; video_id: string; title: string; type: "hero" | "review"; sort_order: number };
+type SiteVideo = { id: string; video_id: string; title: string; type: "hero" | "review" | "consultancy"; sort_order: number };
 
 const sb: any = supabase;
 

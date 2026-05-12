@@ -202,6 +202,139 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          account_name: string
+          account_number: string
+          account_type: string
+          active: boolean
+          created_at: string
+          id: string
+          instructions: string
+          logo_url: string | null
+          name: string
+          sort_order: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          instructions?: string
+          logo_url?: string | null
+          name: string
+          sort_order?: number
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          active?: boolean
+          created_at?: string
+          id?: string
+          instructions?: string
+          logo_url?: string | null
+          name?: string
+          sort_order?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_submissions: {
+        Row: {
+          admin_notes: string | null
+          amount: string
+          appointment_id: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          note: string | null
+          package_id: string | null
+          package_name: string
+          payment_method_id: string | null
+          payment_method_name: string
+          sender_number: string
+          status: string
+          transaction_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount?: string
+          appointment_id?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          note?: string | null
+          package_id?: string | null
+          package_name?: string
+          payment_method_id?: string | null
+          payment_method_name?: string
+          sender_number: string
+          status?: string
+          transaction_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: string
+          appointment_id?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          note?: string | null
+          package_id?: string | null
+          package_name?: string
+          payment_method_id?: string | null
+          payment_method_name?: string
+          sender_number?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_submissions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_submissions_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_submissions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           created_at: string

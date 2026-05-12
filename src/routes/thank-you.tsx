@@ -6,6 +6,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteInfo, waLinkFor } from "@/lib/use-site-data";
+import { ScheduleMeeting } from "@/components/site/ScheduleMeeting";
 
 const sb: any = supabase;
 

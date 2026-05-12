@@ -16,7 +16,11 @@ export function UsersTab() {
 
   const load = () => {
     setLoading(true);
-    list().then((d) => { setUsers(d as any[]); setLoading(false); }).catch((e) => { toast.error(String(e?.message || e)); setLoading(false); });
+    list().then((d: any) => {
+      const arr = Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : [];
+      setUsers(arr);
+      setLoading(false);
+    }).catch((e) => { toast.error(String(e?.message || e)); setUsers([]); setLoading(false); });
   };
   useEffect(load, []);
 

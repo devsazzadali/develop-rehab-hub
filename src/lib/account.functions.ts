@@ -73,7 +73,7 @@ export const adminUpdateUserPassword = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .eq("role", "admin")
       .maybeSingle();
-    if (!roleRow) throw new Response("Forbidden", { status: 403 });
+    if (!roleRow) throw new Error("Forbidden");
 
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, {
       password: data.password,
@@ -91,7 +91,7 @@ export const adminListUsers = createServerFn({ method: "GET" })
       .eq("user_id", context.userId)
       .eq("role", "admin")
       .maybeSingle();
-    if (!roleRow) throw new Response("Forbidden", { status: 403 });
+    if (!roleRow) throw new Error("Forbidden");
 
     const { data: profiles } = await supabaseAdmin
       .from("profiles")

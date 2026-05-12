@@ -417,7 +417,7 @@ function Field({ icon: Icon, label, input }: any) {
   );
 }
 
-function Input({ icon: Icon, label, value, onChange, placeholder, type = "text" }: any) {
+function Input({ icon: Icon, label, value, onChange, placeholder, type = "text" }: { icon: any; label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
   return (
     <label className="block">
       <span className="text-xs font-semibold text-muted-foreground">{label}</span>

@@ -3,14 +3,7 @@ import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { useSiteInfo } from "@/lib/use-site-data";
 
-const links = [
-  { href: "#services", label: "সেবা" },
-  { href: "#why-us", label: "কেন আমরা" },
-  { href: "#doctor", label: "চিকিৎসক" },
-  { href: "#reviews", label: "রিভিউ" },
-  { href: "#appointment", label: "অ্যাপয়েন্টমেন্ট" },
-  { href: "#contact", label: "যোগাযোগ" },
-];
+const links: { href: string; label: string }[] = [];
 
 export function Navbar() {
   const SITE = useSiteInfo();

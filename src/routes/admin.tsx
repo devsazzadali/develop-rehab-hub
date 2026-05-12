@@ -291,9 +291,11 @@ function CRMShell() {
           {view === "analytics" && <AnalyticsView leads={leads} />}
           {view === "activity" && <ActivityView />}
           {view === "payments" && <PaymentsTab />}
+          {view === "schedules" && <SchedulesTab />}
           {view === "users" && <UsersTab />}
           {view === "online" && <OnlineConsultationTab />}
           {view === "videos" && <VideosTab />}
+          {view === "reviews" && <ReviewsTab />}
           {view === "site" && <SiteInfoTab />}
           {view === "tracking" && <TrackingTab />}
         </main>

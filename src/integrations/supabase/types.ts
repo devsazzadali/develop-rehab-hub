@@ -170,6 +170,60 @@ export type Database = {
         }
         Relationships: []
       }
+      consultation_schedules: {
+        Row: {
+          admin_notes: string | null
+          appointment_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          duration_minutes: number
+          id: string
+          meet_link: string
+          payment_submission_id: string | null
+          scheduled_at: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          duration_minutes?: number
+          id?: string
+          meet_link?: string
+          payment_submission_id?: string | null
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          duration_minutes?: number
+          id?: string
+          meet_link?: string
+          payment_submission_id?: string | null
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       lead_activities: {
         Row: {
           appointment_id: string
@@ -380,6 +434,48 @@ export type Database = {
           problem_type?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          active: boolean
+          caption: string | null
+          client_name: string
+          created_at: string
+          id: string
+          media_url: string | null
+          rating: number | null
+          sort_order: number
+          type: string
+          updated_at: string
+          video_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          caption?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          rating?: number | null
+          sort_order?: number
+          type: string
+          updated_at?: string
+          video_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          caption?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          rating?: number | null
+          sort_order?: number
+          type?: string
+          updated_at?: string
+          video_id?: string | null
         }
         Relationships: []
       }

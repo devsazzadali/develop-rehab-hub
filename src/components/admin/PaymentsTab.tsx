@@ -16,6 +16,7 @@ type Submission = {
   customer_name: string; customer_phone: string; customer_email: string | null;
   sender_number: string; transaction_id: string; note: string | null;
   status: string; admin_notes: string | null; confirmed_at: string | null;
+  screenshot_url: string | null;
   created_at: string;
 };
 
@@ -147,6 +148,14 @@ function SubmissionsView() {
 function SubmissionDrawer({ item, onClose, reload }: { item: Submission; onClose: () => void; reload: () => void }) {
   const [adminNotes, setAdminNotes] = useState(item.admin_notes || "");
   const [busy, setBusy] = useState(false);
+  const [shotUrl, setShotUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!item.screenshot_url) return;
+    sb.storage.from("payment_proofs").createSignedUrl(item.screenshot_url, 3600).then(({ data }: any) => {
+      if (data?.signedUrl) setShotUrl(data.signedUrl);
+    });
+  }, [item.screenshot_url]);
 
   const setStatus = async (status: string) => {
     setBusy(true);
@@ -193,6 +202,15 @@ function SubmissionDrawer({ item, onClose, reload }: { item: Submission; onClose
           <div className="mt-4 bg-muted/40 rounded-xl p-3">
             <div className="text-xs font-semibold text-muted-foreground mb-1">কাস্টমার নোট</div>
             <p className="text-sm whitespace-pre-line">{item.note}</p>
+          </div>
+        )}
+
+        {shotUrl && (
+          <div className="mt-4">
+            <div className="text-xs font-semibold text-muted-foreground mb-1">পেমেন্ট স্ক্রিনশট</div>
+            <a href={shotUrl} target="_blank" rel="noreferrer">
+              <img src={shotUrl} alt="proof" className="max-h-80 rounded-lg border border-border" />
+            </a>
           </div>
         )}
 

@@ -1110,7 +1110,7 @@ function extractYouTubeId(input: string): string {
 function VideosTab() {
   const [items, setItems] = useState<SiteVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [type, setType] = useState<"hero" | "review">("review");
+  const [type, setType] = useState<"hero" | "review" | "consultancy">("review");
   const [videoId, setVideoId] = useState("");
   const [title, setTitle] = useState("");
   const load = async () => {

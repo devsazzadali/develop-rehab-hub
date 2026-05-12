@@ -151,6 +151,7 @@ function SubmissionDrawer({ item, onClose, reload }: { item: Submission; onClose
   const [adminNotes, setAdminNotes] = useState(item.admin_notes || "");
   const [busy, setBusy] = useState(false);
   const [shotUrl, setShotUrl] = useState<string | null>(null);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   useEffect(() => {
     if (!item.screenshot_url) return;

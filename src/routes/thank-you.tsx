@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Clock, XCircle, MessageCircle, Phone, Mail, ArrowRight, Loader2, ShieldCheck, Receipt } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, MessageCircle, Phone, Mail, ArrowRight, Loader2, ShieldCheck, Receipt, FileCheck2, Radio } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +41,8 @@ function ThankYouPage() {
   const SITE = useSiteInfo();
   const [item, setItem] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pulse, setPulse] = useState(false);
+  const [rtConnected, setRtConnected] = useState(false);
 
   useEffect(() => {
     if (!id) { setLoading(false); return; }
@@ -50,8 +52,12 @@ function ThankYouPage() {
     });
     const ch = sb.channel(`pay-${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "payment_submissions", filter: `id=eq.${id}` },
-        (p: any) => setItem(p.new as Submission))
-      .subscribe();
+        (p: any) => {
+          setItem(p.new as Submission);
+          setPulse(true);
+          setTimeout(() => setPulse(false), 1800);
+        })
+      .subscribe((status: string) => setRtConnected(status === "SUBSCRIBED"));
     return () => { sb.removeChannel(ch); };
   }, [id]);
 
@@ -74,28 +80,37 @@ function ThankYouPage() {
           ) : (
             <>
               {/* Hero status card */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-primary/5 via-card to-accent/5 border border-border rounded-3xl p-8 md:p-10 text-center shadow-elegant">
+              <motion.div
+                key={item.status}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                className={`relative bg-gradient-to-br from-primary/5 via-card to-accent/5 border rounded-3xl p-8 md:p-10 text-center shadow-elegant transition-colors ${
+                  pulse ? "border-primary ring-4 ring-primary/20" : "border-border"
+                }`}>
+                {/* Realtime indicator */}
+                <div className="absolute top-4 right-4 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+                  <span className={`relative flex h-2 w-2`}>
+                    <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${rtConnected ? "animate-ping bg-emerald-400" : "bg-muted-foreground/40"}`}></span>
+                    <span className={`relative inline-flex rounded-full h-2 w-2 ${rtConnected ? "bg-emerald-500" : "bg-muted-foreground"}`}></span>
+                  </span>
+                  <span className={rtConnected ? "text-emerald-600" : "text-muted-foreground"}>
+                    {rtConnected ? "Live" : "Connecting..."}
+                  </span>
+                </div>
+
                 <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }}
                   className={`w-20 h-20 rounded-full grid place-items-center mx-auto border-2 ${meta.cls}`}>
-                  <Icon className="w-10 h-10" />
+                  <Icon className={`w-10 h-10 ${item.status === "pending" ? "animate-pulse" : ""}`} />
                 </motion.div>
                 <div className={`mt-4 inline-block text-xs font-bold px-3 py-1 rounded-full border ${meta.cls}`}>
-                  Live: {meta.label}
+                  {meta.label}
                 </div>
                 <h1 className="mt-4 text-3xl md:text-4xl font-extrabold text-foreground">
                   ধন্যবাদ, {item.customer_name}!
                 </h1>
                 <p className="mt-3 text-muted-foreground max-w-xl mx-auto">{meta.msg}</p>
-                {item.status === "pending" && (
-                  <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                    </span>
-                    রিয়েল-টাইম স্ট্যাটাস আপডেট চালু আছে
-                  </div>
-                )}
+
+                {/* Progress timeline */}
+                <StatusTimeline status={item.status} confirmedAt={item.confirmed_at} createdAt={item.created_at} />
               </motion.div>
 
               {/* Service details */}
@@ -159,6 +174,44 @@ function ThankYouPage() {
         </div>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function StatusTimeline({ status, createdAt, confirmedAt }: { status: string; createdAt: string; confirmedAt: string | null }) {
+  const isRejected = status === "rejected";
+  const isConfirmed = status === "confirmed";
+  const steps = [
+    { key: "submitted", label: "সাবমিট", icon: FileCheck2, done: true, time: createdAt },
+    { key: "review",    label: "রিভিউ",   icon: Radio,      done: isConfirmed || isRejected, active: status === "pending", time: null as string | null },
+    { key: "final",     label: isRejected ? "রিজেক্টেড" : "কনফার্মড", icon: isRejected ? XCircle : CheckCircle2, done: isConfirmed || isRejected, time: confirmedAt },
+  ];
+  return (
+    <div className="mt-8 flex items-center justify-center gap-2 sm:gap-3">
+      {steps.map((s, i) => {
+        const SIcon = s.icon;
+        const tone = isRejected && s.key === "final"
+          ? "bg-red-500 text-white border-red-500"
+          : s.done
+          ? "bg-emerald-500 text-white border-emerald-500"
+          : s.active
+          ? "bg-amber-500 text-white border-amber-500 animate-pulse"
+          : "bg-muted text-muted-foreground border-border";
+        return (
+          <div key={s.key} className="flex items-center gap-2 sm:gap-3">
+            <div className="flex flex-col items-center">
+              <div className={`w-9 h-9 rounded-full grid place-items-center border-2 ${tone}`}>
+                <SIcon className="w-4 h-4" />
+              </div>
+              <div className="mt-1.5 text-[10px] sm:text-xs font-bold text-foreground">{s.label}</div>
+              {s.time && <div className="text-[9px] text-muted-foreground">{new Date(s.time).toLocaleTimeString("bn-BD", { hour: "numeric", minute: "2-digit" })}</div>}
+            </div>
+            {i < steps.length - 1 && (
+              <div className={`h-0.5 w-6 sm:w-12 rounded ${steps[i + 1].done || steps[i + 1].active ? "bg-emerald-500" : "bg-border"}`} />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

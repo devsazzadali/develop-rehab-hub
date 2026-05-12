@@ -8,6 +8,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { INFO_KEY_MAP, type SiteInfo } from "@/lib/use-site-data";
+import { OnlineConsultationTab } from "@/components/admin/OnlineConsultationTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({

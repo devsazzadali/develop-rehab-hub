@@ -49,12 +49,18 @@ export function Navbar() {
           {links.map((l) => (
             <a
               key={l.href}
-              href={l.href}
+              href={`/${l.href}`}
               className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
             >
               {l.label}
             </a>
           ))}
+          <Link
+            to="/online-consultation"
+            className="text-sm font-bold text-primary hover:opacity-80 transition-colors"
+          >
+            অনলাইন কনসালটেশন
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">

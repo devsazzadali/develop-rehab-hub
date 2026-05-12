@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { INFO_KEY_MAP, type SiteInfo } from "@/lib/use-site-data";
 import { OnlineConsultationTab } from "@/components/admin/OnlineConsultationTab";
 import { PaymentsTab } from "@/components/admin/PaymentsTab";
+import { UsersTab } from "@/components/admin/UsersTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -174,7 +175,7 @@ VALUES ('${userId}', 'admin');`}</pre>
 }
 
 // ---------- CRM Shell with sidebar ----------
-type NavKey = "overview" | "leads" | "followups" | "categories" | "analytics" | "activity" | "payments" | "online" | "videos" | "site" | "tracking";
+type NavKey = "overview" | "leads" | "followups" | "categories" | "analytics" | "activity" | "payments" | "users" | "online" | "videos" | "site" | "tracking";
 
 const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?: string }>; group: string }[] = [
   { key: "overview",   label: "Dashboard",      icon: LayoutDashboard, group: "CRM" },
@@ -184,6 +185,7 @@ const NAV: { key: NavKey; label: string; icon: React.ComponentType<{ className?:
   { key: "analytics",  label: "Analytics",      icon: BarChart3,       group: "CRM" },
   { key: "activity",   label: "Activity Log",   icon: FileText,        group: "CRM" },
   { key: "payments",   label: "Payments",       icon: Wallet,          group: "CRM" },
+  { key: "users",      label: "Users",          icon: UserCheck,       group: "CRM" },
   { key: "online",     label: "Online Consult", icon: Video,           group: "Site" },
   { key: "videos",     label: "Videos",         icon: Video,           group: "Site" },
   { key: "site",       label: "Site Info",      icon: Settings2,       group: "Site" },
@@ -285,6 +287,7 @@ function CRMShell() {
           {view === "analytics" && <AnalyticsView leads={leads} />}
           {view === "activity" && <ActivityView />}
           {view === "payments" && <PaymentsTab />}
+          {view === "users" && <UsersTab />}
           {view === "online" && <OnlineConsultationTab />}
           {view === "videos" && <VideosTab />}
           {view === "site" && <SiteInfoTab />}

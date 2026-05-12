@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PaymentRouteImport } from './routes/payment'
 import { Route as OnlineConsultationRouteImport } from './routes/online-consultation'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
+const PaymentRoute = PaymentRouteImport.update({
+  id: '/payment',
+  path: '/payment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnlineConsultationRoute = OnlineConsultationRouteImport.update({
   id: '/online-consultation',
   path: '/online-consultation',
@@ -33,34 +39,45 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/online-consultation': typeof OnlineConsultationRoute
+  '/payment': typeof PaymentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/online-consultation': typeof OnlineConsultationRoute
+  '/payment': typeof PaymentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/online-consultation': typeof OnlineConsultationRoute
+  '/payment': typeof PaymentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/online-consultation'
+  fullPaths: '/' | '/admin' | '/online-consultation' | '/payment'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/online-consultation'
-  id: '__root__' | '/' | '/admin' | '/online-consultation'
+  to: '/' | '/admin' | '/online-consultation' | '/payment'
+  id: '__root__' | '/' | '/admin' | '/online-consultation' | '/payment'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   OnlineConsultationRoute: typeof OnlineConsultationRoute
+  PaymentRoute: typeof PaymentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/payment': {
+      id: '/payment'
+      path: '/payment'
+      fullPath: '/payment'
+      preLoaderRoute: typeof PaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/online-consultation': {
       id: '/online-consultation'
       path: '/online-consultation'
@@ -89,7 +106,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   OnlineConsultationRoute: OnlineConsultationRoute,
+  PaymentRoute: PaymentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

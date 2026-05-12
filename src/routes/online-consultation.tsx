@@ -248,7 +248,167 @@ function OnlineConsultationPage() {
           </div>
         </section>
 
-        {/* FAQ */}
+        {/* WHO IS THIS FOR */}
+        <section className="py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <span className="text-primary text-sm font-bold uppercase tracking-wider">কাদের জন্য</span>
+              <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-foreground">এই সেবা কারা নিতে পারবেন?</h2>
+              <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">আপনি যদি নিচের যেকোনো একটির সাথে নিজেকে মেলাতে পারেন — এই কনসালটেশন আপনার জন্য</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+              {[
+                { icon: Plane, t: "প্রবাসী বাংলাদেশি", d: "মধ্যপ্রাচ্য, ইউরোপ, আমেরিকা — যেখানেই থাকুন, বাংলায় বিশেষজ্ঞ পরামর্শ পান" },
+                { icon: Briefcase, t: "ব্যস্ত পেশাজীবী", d: "অফিস, মিটিং, ট্রাভেল — হাসপাতালে যাওয়ার সময় নেই? ঘর থেকেই সেবা নিন" },
+                { icon: Home, t: "বয়স্ক রোগী", d: "চলাচলে কষ্ট, যাতায়াত ঝুঁকিপূর্ণ — পরিবারের সাথে বসেই কনসালটেশন" },
+                { icon: Baby, t: "মা ও শিশু", d: "প্রসব-পরবর্তী পেইন, পেডিয়াট্রিক ফিজিও — নিরাপদ ঘরোয়া পরিবেশে" },
+                { icon: Activity, t: "ক্রীড়াবিদ", d: "চোট, পুনর্বাসন, পারফরম্যান্স রিকভারি — দ্রুত বিশেষজ্ঞ গাইডলাইন" },
+                { icon: TrendingUp, t: "দীর্ঘস্থায়ী ব্যথায় ভুক্তভোগী", d: "কোমর, ঘাড়, হাঁটু — বছরের পর বছর কষ্ট? এবার সঠিক সমাধান" },
+              ].map((b, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                  className="bg-card border border-border rounded-2xl p-6 hover:border-primary/40 hover:shadow-soft transition group">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 grid place-items-center mb-3 group-hover:scale-110 transition">
+                    <b.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-foreground mb-1">{b.t}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{b.d}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CONDITIONS WE TREAT */}
+        <section className="py-16 bg-secondary/30">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="text-center mb-10">
+              <span className="text-primary text-sm font-bold uppercase tracking-wider">যে সমস্যাগুলোতে সাহায্য করি</span>
+              <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-foreground">কোন সমস্যায় কনসালটেশন নেবেন?</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {[
+                "কোমর ব্যথা (Lower Back Pain)", "ঘাড় ব্যথা / Cervical", "হাঁটুর ব্যথা / Knee Pain",
+                "কাঁধ ব্যথা / Frozen Shoulder", "Sciatica / Disc Prolapse", "Stroke পরবর্তী রিহ্যাব",
+                "Facial Palsy / Bell's Palsy", "Sports Injury", "Post-Surgery Recovery",
+                "Arthritis / Joint Pain", "Postural Problem", "শিশু সেরিব্রাল পালসি",
+              ].map((c, i) => (
+                <div key={i} className="bg-card border border-border rounded-xl px-4 py-3 text-sm font-medium text-foreground inline-flex items-center gap-2">
+                  <Stethoscope className="w-4 h-4 text-primary shrink-0" />
+                  <span>{c}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              আপনার সমস্যা তালিকায় নেই? <a href={waLink} target="_blank" rel="noreferrer" className="text-primary font-semibold underline">WhatsApp করুন</a> — আমরা গাইড করব
+            </p>
+          </div>
+        </section>
+
+        {/* ONLINE vs OFFLINE COMPARISON */}
+        <section className="py-16 md:py-20">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="text-center mb-10">
+              <span className="text-primary text-sm font-bold uppercase tracking-wider">তুলনা</span>
+              <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-foreground">অনলাইন vs প্রচলিত হাসপাতাল ভিজিট</h2>
+            </div>
+            <div className="grid md:grid-cols-2 gap-5">
+              <div className="bg-card border-2 border-primary rounded-3xl p-6 shadow-elegant relative">
+                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-bold">⭐ সুপারিশকৃত</div>
+                <h3 className="text-xl font-extrabold text-primary mb-4 inline-flex items-center gap-2"><Video className="w-5 h-5" /> অনলাইন কনসালটেশন</h3>
+                <ul className="space-y-3 text-sm">
+                  {["যাতায়াত খরচ ও সময় শূন্য", "ঘরে বসে আরামদায়ক পরিবেশ", "৫ মিনিটে অ্যাপয়েন্টমেন্ট", "WhatsApp ফলোআপ সাপোর্ট", "কাস্টম এক্সারসাইজ ভিডিও", "প্রবাসেও একই সেবা", "সাশ্রয়ী মূল্য"].map((p, i) => (
+                    <li key={i} className="flex items-start gap-2"><CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" /><span className="text-foreground/90">{p}</span></li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-card border border-border rounded-3xl p-6">
+                <h3 className="text-xl font-bold text-foreground mb-4 inline-flex items-center gap-2"><Home className="w-5 h-5 text-muted-foreground" /> হাসপাতাল ভিজিট</h3>
+                <ul className="space-y-3 text-sm">
+                  {["যাতায়াতে ২-৪ ঘণ্টা নষ্ট", "জ্যাম, পার্কিং, অপেক্ষা", "অ্যাপয়েন্টমেন্ট পেতে ১-২ সপ্তাহ", "ফলোআপের জন্য আবার ভিজিট", "ভিড় ও সংক্রমণের ঝুঁকি", "প্রবাস থেকে অসম্ভব", "অতিরিক্ত খরচ"].map((p, i) => (
+                    <li key={i} className="flex items-start gap-2"><XIcon className="w-5 h-5 text-destructive mt-0.5 shrink-0" /><span className="text-muted-foreground">{p}</span></li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TESTIMONIALS */}
+        <section className="py-16 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <span className="text-primary text-sm font-bold uppercase tracking-wider">রোগীদের মুখে</span>
+              <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-foreground">যা বলছেন আমাদের রোগীরা</h2>
+              <div className="mt-3 inline-flex items-center gap-2">
+                {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 text-yellow-500 fill-yellow-500" />)}
+                <span className="text-sm font-semibold text-foreground ml-1">৪.৯/৫ — ১২০০+ রিভিউ</span>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {[
+                { name: "রহিমা বেগম", loc: "দুবাই, UAE", text: "৩ বছর কোমর ব্যথায় ভুগছিলাম। প্রবাসে ছিলাম বলে দেশে যেতে পারতাম না। অনলাইন কনসালটেশনে যে এক্সারসাইজ প্ল্যান পেলাম, ২ মাসেই অর্ধেক ব্যথা কমে গেছে।" },
+                { name: "মোঃ সাইফুল ইসলাম", loc: "ঢাকা", text: "অফিসের চাপে হাসপাতালে যাওয়ার সময় ছিল না। ভিডিও কলে ৪৫ মিনিটে যা বুঝিয়েছেন — অসাধারণ। ৭ দিনের WhatsApp সাপোর্ট সত্যিই কাজে দিয়েছে।" },
+                { name: "নাজনীন আক্তার", loc: "লন্ডন, UK", text: "মায়ের স্ট্রোকের পর রিহ্যাব নিয়ে চিন্তিত ছিলাম। প্রিমিয়াম প্যাকেজে সাপ্তাহিক ফলোআপ এবং কাস্টম ব্যায়াম গাইডলাইন — মা এখন অনেক ভালো।" },
+              ].map((t, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  className="bg-card border border-border rounded-3xl p-6 shadow-soft hover:shadow-elegant transition relative">
+                  <Quote className="absolute top-4 right-4 w-8 h-8 text-primary/20" />
+                  <div className="flex gap-1 mb-3">
+                    {[1,2,3,4,5].map(j => <Star key={j} className="w-4 h-4 text-yellow-500 fill-yellow-500" />)}
+                  </div>
+                  <p className="text-sm text-foreground/90 leading-relaxed mb-4">"{t.text}"</p>
+                  <div className="flex items-center gap-3 pt-4 border-t border-border">
+                    <div className="w-10 h-10 rounded-full gradient-primary text-primary-foreground grid place-items-center font-bold">
+                      {t.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-bold text-foreground text-sm">{t.name}</div>
+                      <div className="text-xs text-muted-foreground">{t.loc}</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* GUARANTEE */}
+        <section className="py-16">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="bg-card border-2 border-primary/30 rounded-3xl p-8 md:p-12 shadow-elegant relative overflow-hidden">
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/10 rounded-full blur-2xl" />
+              <div className="relative grid md:grid-cols-[auto_1fr] gap-6 items-center">
+                <div className="w-24 h-24 rounded-full gradient-primary grid place-items-center shadow-elegant mx-auto md:mx-0">
+                  <ShieldCheck className="w-12 h-12 text-primary-foreground" />
+                </div>
+                <div className="text-center md:text-left">
+                  <span className="text-primary text-xs font-bold uppercase tracking-wider">আমাদের ওয়াদা</span>
+                  <h2 className="mt-2 text-2xl md:text-3xl font-extrabold text-foreground">১০০% মানি ব্যাক গ্যারান্টি</h2>
+                  <p className="mt-3 text-muted-foreground leading-relaxed">
+                    কনসালটেশনে যদি আপনি সন্তুষ্ট না হন — কোনো প্রশ্ন ছাড়াই ৭ দিনের মধ্যে সম্পূর্ণ টাকা ফেরত। আপনার আস্থাই আমাদের সবচেয়ে বড় পুঁজি।
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* URGENCY / SLOTS */}
+        <section className="py-12">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 border border-amber-500/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
+              <Zap className="w-12 h-12 text-amber-500 shrink-0" />
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl md:text-2xl font-extrabold text-foreground">সীমিত স্লট — দিনে মাত্র ৮ জন</h3>
+                <p className="mt-1 text-sm text-muted-foreground">প্রতিটি রোগীকে পর্যাপ্ত সময় দেওয়ার জন্য আমরা প্রতিদিন সীমিত সংখ্যক কনসালটেশন নিই। আজকের স্লট দ্রুত শেষ হয়ে যাচ্ছে।</p>
+              </div>
+              <a href={waLink} target="_blank" rel="noreferrer" className="px-6 py-3 rounded-full gradient-primary text-primary-foreground font-bold shrink-0 inline-flex items-center gap-2 hover:opacity-95">
+                <MessageCircle className="w-4 h-4" /> স্লট বুক করুন
+              </a>
+            </div>
+          </div>
+        </section>
+
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-3xl">
             <div className="text-center mb-10">

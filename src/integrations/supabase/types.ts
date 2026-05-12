@@ -38,6 +38,7 @@ export type Database = {
           problem_type: string
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           address?: string | null
@@ -62,6 +63,7 @@ export type Database = {
           problem_type: string
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           address?: string | null
@@ -86,6 +88,7 @@ export type Database = {
           problem_type?: string
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -264,10 +267,12 @@ export type Database = {
           package_name: string
           payment_method_id: string | null
           payment_method_name: string
+          screenshot_url: string | null
           sender_number: string
           status: string
           transaction_id: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -285,10 +290,12 @@ export type Database = {
           package_name?: string
           payment_method_id?: string | null
           payment_method_name?: string
+          screenshot_url?: string | null
           sender_number: string
           status?: string
           transaction_id: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -306,10 +313,12 @@ export type Database = {
           package_name?: string
           payment_method_id?: string | null
           payment_method_name?: string
+          screenshot_url?: string | null
           sender_number?: string
           status?: string
           transaction_id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -334,6 +343,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          details: string | null
+          email: string
+          id: string
+          name: string
+          phone: string
+          problem_type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          details?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          problem_type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          details?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          problem_type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       site_settings: {
         Row: {

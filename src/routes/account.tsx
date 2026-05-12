@@ -105,6 +105,52 @@ function AccountPage() {
             </div>
           </div>
 
+          <div className="bg-card border-2 border-primary/30 rounded-2xl p-6">
+            <h2 className="font-bold text-lg flex items-center gap-2 mb-4"><Video className="w-5 h-5 text-primary" /> অনলাইন কনসালটেশন মিটিং ({schedules.filter(s => s.status === "scheduled").length})</h2>
+            {schedules.filter(s => s.status === "scheduled").length === 0 ? (
+              <p className="text-sm text-muted-foreground">এখনো কোনো meeting schedule হয়নি। পেমেন্ট confirm হলে admin schedule করে দিবে।</p>
+            ) : (
+              <div className="space-y-3">
+                {schedules.filter(s => s.status === "scheduled").map((s) => {
+                  const dt = new Date(s.scheduled_at);
+                  const diffMs = dt.getTime() - Date.now();
+                  const canJoin = diffMs <= 10 * 60_000 && diffMs > -(s.duration_minutes + 30) * 60_000;
+                  const fmt = (ms: number) => {
+                    const abs = Math.abs(ms);
+                    const d = Math.floor(abs / 86400000);
+                    const h = Math.floor((abs % 86400000) / 3600000);
+                    const m = Math.floor((abs % 3600000) / 60000);
+                    return `${d ? d + "দিন " : ""}${h}ঘ ${m}মি`;
+                  };
+                  return (
+                    <div key={s.id} className="border border-primary/20 rounded-xl p-4 bg-primary/5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <div className="font-bold text-base">{dt.toLocaleString("bn-BD", { dateStyle: "full", timeStyle: "short" })}</div>
+                          <div className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-2">
+                            <Clock className="w-3 h-3" /> {s.duration_minutes} মিনিট
+                            {!canJoin && diffMs > 0 && <span>• শুরু হবে {fmt(diffMs)} এ</span>}
+                          </div>
+                        </div>
+                        <a href={canJoin ? s.meet_link : undefined}
+                          target="_blank" rel="noreferrer"
+                          onClick={(e) => { if (!canJoin) { e.preventDefault(); toast.info("Meeting এর ১০ মিনিট আগে join করতে পারবেন"); } }}
+                          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm ${
+                            canJoin ? "gradient-primary text-primary-foreground shadow-elegant"
+                                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                          }`}>
+                          <Video className="w-4 h-4" /> {canJoin ? "Join Meeting" : "শীঘ্রই"}
+                          {canJoin && <ExternalLink className="w-3 h-3" />}
+                        </a>
+                      </div>
+                      {s.admin_notes && <p className="mt-2 text-xs text-muted-foreground italic">📝 {s.admin_notes}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div className="bg-card border border-border rounded-2xl p-6">
             <h2 className="font-bold text-lg flex items-center gap-2 mb-4"><Calendar className="w-5 h-5 text-primary" /> অ্যাপয়েন্টমেন্ট ({appointments.length})</h2>
             {appointments.length === 0 ? <p className="text-sm text-muted-foreground">কোনো অ্যাপয়েন্টমেন্ট নেই।</p> : (

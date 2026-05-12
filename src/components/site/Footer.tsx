@@ -1,5 +1,6 @@
 import { Facebook, Mail, MapPin, Phone } from "lucide-react";
 import { useSiteInfo } from "@/lib/use-site-data";
+import logo from "@/assets/logo.png";
 
 export function Footer() {
   const SITE = useSiteInfo();
@@ -9,8 +10,8 @@ export function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-foreground text-primary grid place-items-center font-bold">
-                {SITE.brandInitial}
+              <div className="w-12 h-12 rounded-xl bg-primary-foreground grid place-items-center p-1">
+                <img src={logo} alt={SITE.shortName} className="w-full h-full object-contain" />
               </div>
               <div>
                 <div className="font-bold">{SITE.shortName}</div>

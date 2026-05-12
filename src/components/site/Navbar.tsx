@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { useSiteInfo } from "@/lib/use-site-data";
+import logo from "@/assets/logo.png";
 
 const links: { href: string; label: string }[] = [];
 
@@ -25,9 +26,7 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 min-w-0">
-          <div className="w-10 h-10 rounded-xl gradient-primary grid place-items-center text-primary-foreground font-bold shadow-soft shrink-0">
-            {SITE.brandInitial}
-          </div>
+          <img src={logo} alt={SITE.shortName} className="w-10 h-10 object-contain shrink-0" />
           <div className="min-w-0">
             <div className="font-bold text-sm sm:text-base text-foreground truncate">
               {SITE.shortName}

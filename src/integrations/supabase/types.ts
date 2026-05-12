@@ -89,6 +89,84 @@ export type Database = {
         }
         Relationships: []
       }
+      consultation_faqs: {
+        Row: {
+          active: boolean
+          answer: string
+          created_at: string
+          id: string
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          answer: string
+          created_at?: string
+          id?: string
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          answer?: string
+          created_at?: string
+          id?: string
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      consultation_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          cta_label: string | null
+          duration: string | null
+          features: string[]
+          id: string
+          is_popular: boolean
+          name: string
+          original_price: string | null
+          price: string
+          sort_order: number
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          cta_label?: string | null
+          duration?: string | null
+          features?: string[]
+          id?: string
+          is_popular?: boolean
+          name: string
+          original_price?: string | null
+          price?: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          cta_label?: string | null
+          duration?: string | null
+          features?: string[]
+          id?: string
+          is_popular?: boolean
+          name?: string
+          original_price?: string | null
+          price?: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_activities: {
         Row: {
           appointment_id: string

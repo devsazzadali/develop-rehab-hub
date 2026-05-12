@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Loader2, CheckCircle2, X, Phone, Hash, Mail, Clock, Eye } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, CheckCircle2, X, Phone, Hash, Mail, Clock, Eye, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ScheduleMeetingDialog } from "./ScheduleMeetingDialog";
 
 const sb: any = supabase;
 

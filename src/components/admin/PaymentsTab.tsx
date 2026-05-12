@@ -18,6 +18,7 @@ type Submission = {
   sender_number: string; transaction_id: string; note: string | null;
   status: string; admin_notes: string | null; confirmed_at: string | null;
   screenshot_url: string | null;
+  user_id: string | null;
   created_at: string;
 };
 

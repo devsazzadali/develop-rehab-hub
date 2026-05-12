@@ -1145,6 +1145,7 @@ function VideosTab() {
         <div className="grid md:grid-cols-3 gap-3">
           <select value={type} onChange={(e) => setType(e.target.value as any)} className="rounded-xl border border-input bg-background px-3 py-2.5">
             <option value="review">Review video</option>
+            <option value="consultancy">Online Consultancy</option>
             <option value="hero">Hero (intro)</option>
           </select>
           <input value={videoId} onChange={(e) => setVideoId(e.target.value)} placeholder="YouTube URL or ID" className="rounded-xl border border-input bg-background px-3 py-2.5" />

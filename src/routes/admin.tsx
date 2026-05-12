@@ -243,9 +243,9 @@ function CRMShell() {
   };
 
   return (
-    <div className="min-h-screen flex bg-secondary/30">
+    <div className="min-h-screen flex bg-gradient-to-br from-secondary/40 via-background to-primary/5">
       {/* Sidebar */}
-      <aside className={`hidden md:flex flex-col bg-[#1e1e2e] text-slate-200 transition-all duration-200 ${collapsed ? "w-16" : "w-60"} sticky top-0 h-screen`}>
+      <aside className={`hidden md:flex flex-col bg-gradient-to-b from-[#0f0f1a] via-[#1a1a2e] to-[#16213e] text-slate-200 transition-all duration-300 ${collapsed ? "w-16" : "w-64"} sticky top-0 h-screen border-r border-white/5 shadow-2xl`}>
         <SidebarBrand collapsed={collapsed} />
         <SidebarNav view={view} setView={setView} collapsed={collapsed} />
         <SidebarFooter collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
@@ -254,8 +254,8 @@ function CRMShell() {
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex" onClick={() => setMobileOpen(false)}>
-          <div className="absolute inset-0 bg-black/50" />
-          <aside className="relative w-64 bg-[#1e1e2e] text-slate-200 flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <aside className="relative w-64 bg-gradient-to-b from-[#0f0f1a] via-[#1a1a2e] to-[#16213e] text-slate-200 flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <SidebarBrand collapsed={false} />
             <SidebarNav view={view} setView={(v) => { setView(v); setMobileOpen(false); }} collapsed={false} />
             <SidebarFooter collapsed={false} onToggle={() => setMobileOpen(false)} />
@@ -265,18 +265,23 @@ function CRMShell() {
 
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-20 bg-card/90 backdrop-blur-xl border-b border-border">
-          <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-3">
+        <header className="sticky top-0 z-20 bg-gradient-to-r from-card/95 via-card/90 to-card/95 backdrop-blur-xl border-b border-border/60 shadow-sm">
+          <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-3.5">
             <div className="flex items-center gap-3 min-w-0">
-              <button className="md:hidden p-2 rounded-lg hover:bg-muted" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></button>
+              <button className="md:hidden p-2 rounded-lg hover:bg-muted transition" onClick={() => setMobileOpen(true)}><Menu className="w-5 h-5" /></button>
               <div className="min-w-0">
-                <h1 className="text-base md:text-lg font-bold text-foreground truncate">{NAV.find((n) => n.key === view)?.label}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base md:text-lg font-bold text-foreground truncate">{NAV.find((n) => n.key === view)?.label}</h1>
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-[10px] font-bold text-primary uppercase tracking-wider">
+                    <Sparkles className="w-2.5 h-2.5" /> Pro
+                  </span>
+                </div>
                 <p className="text-xs text-muted-foreground hidden sm:block">Premium CRM Dashboard</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <a href="/" target="_blank" rel="noreferrer" className="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-card border border-border hover:border-primary items-center gap-2 text-xs transition">View Site ↗</a>
-              <button onClick={() => supabase.auth.signOut()} className="px-3 py-1.5 rounded-lg bg-card border border-border hover:border-destructive hover:text-destructive inline-flex items-center gap-2 text-xs transition">
+              <a href="/" target="_blank" rel="noreferrer" className="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-card border border-border hover:border-primary hover:shadow-soft items-center gap-2 text-xs font-medium transition-all">View Site ↗</a>
+              <button onClick={() => supabase.auth.signOut()} className="px-3 py-1.5 rounded-lg bg-card border border-border hover:border-destructive hover:text-destructive hover:shadow-soft inline-flex items-center gap-2 text-xs font-medium transition-all">
                 <LogOut className="w-3.5 h-3.5" /> Logout
               </button>
             </div>
@@ -306,11 +311,17 @@ function CRMShell() {
 
 function SidebarBrand({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className="h-14 flex items-center gap-3 px-4 border-b border-white/10">
-      <div className="w-9 h-9 rounded-xl gradient-primary grid place-items-center text-primary-foreground shadow-elegant shrink-0">
-        <Sparkles className="w-4 h-4" />
+    <div className="h-16 flex items-center gap-3 px-4 border-b border-white/10 bg-white/5">
+      <div className="relative w-10 h-10 rounded-xl gradient-primary grid place-items-center text-primary-foreground shadow-elegant shrink-0">
+        <Sparkles className="w-5 h-5" />
+        <span className="absolute -inset-0.5 rounded-xl bg-primary/40 blur-md -z-10" />
       </div>
-      {!collapsed && <div className="font-bold text-white truncate">Admin CRM</div>}
+      {!collapsed && (
+        <div className="min-w-0">
+          <div className="font-bold text-white truncate leading-tight">Admin CRM</div>
+          <div className="text-[10px] uppercase tracking-wider text-primary/80 font-semibold">Premium Suite</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -318,17 +329,24 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
 function SidebarNav({ view, setView, collapsed }: { view: NavKey; setView: (v: NavKey) => void; collapsed: boolean }) {
   const groups = Array.from(new Set(NAV.map((n) => n.group)));
   return (
-    <nav className="flex-1 overflow-y-auto py-3">
+    <nav className="flex-1 overflow-y-auto py-3 scrollbar-thin">
       {groups.map((g) => (
-        <div key={g} className="mb-3">
-          {!collapsed && <div className="px-4 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{g}</div>}
+        <div key={g} className="mb-4">
+          {!collapsed && <div className="px-4 pb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">{g}</div>}
           {NAV.filter((n) => n.group === g).map(({ key, label, icon: Icon }) => {
             const active = view === key;
             return (
               <button key={key} onClick={() => setView(key)} title={collapsed ? label : ""}
-                className={`group w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all border-l-2 ${active ? "bg-white/10 text-white border-primary font-semibold" : "border-transparent text-slate-300 hover:bg-white/5 hover:text-white"}`}>
-                <Icon className="w-4 h-4 shrink-0" />
-                {!collapsed && <span className="truncate">{label}</span>}
+                className={`group relative w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all ${active ? "text-white font-semibold" : "text-slate-400 hover:text-white"}`}>
+                {active && (
+                  <>
+                    <span className="absolute inset-y-1 left-0 w-1 rounded-r-full bg-gradient-to-b from-primary to-accent" />
+                    <span className="absolute inset-y-1 inset-x-2 rounded-lg bg-gradient-to-r from-white/10 to-white/5 border border-white/10" />
+                  </>
+                )}
+                {!active && <span className="absolute inset-y-1 inset-x-2 rounded-lg group-hover:bg-white/5 transition" />}
+                <Icon className={`relative w-4 h-4 shrink-0 ${active ? "text-primary" : ""}`} />
+                {!collapsed && <span className="relative truncate">{label}</span>}
               </button>
             );
           })}
@@ -340,8 +358,8 @@ function SidebarNav({ view, setView, collapsed }: { view: NavKey; setView: (v: N
 
 function SidebarFooter({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   return (
-    <div className="border-t border-white/10 p-2">
-      <button onClick={onToggle} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 text-slate-300 text-xs">
+    <div className="border-t border-white/10 p-2 bg-white/[0.02]">
+      <button onClick={onToggle} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white text-xs transition">
         <ChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? "rotate-180" : ""}`} />
         {!collapsed && "Collapse"}
       </button>

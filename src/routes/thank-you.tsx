@@ -6,6 +6,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteInfo, waLinkFor } from "@/lib/use-site-data";
+import { ScheduleMeeting } from "@/components/site/ScheduleMeeting";
 
 const sb: any = supabase;
 
@@ -117,6 +118,13 @@ function ThankYouPage() {
                   </div>
                 )}
               </div>
+
+              {/* Schedule meeting (only after admin confirms payment) */}
+              {item.status === "confirmed" && (
+                <div className="mt-6">
+                  <ScheduleMeeting paymentId={item.id} customerName={item.customer_name} />
+                </div>
+              )}
 
               {/* Emergency contact */}
               <div className="mt-6 bg-gradient-to-br from-emerald-500/5 to-primary/5 border border-emerald-500/20 rounded-2xl p-6">

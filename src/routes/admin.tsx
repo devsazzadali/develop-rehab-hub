@@ -282,6 +282,7 @@ function CRMShell() {
           {view === "categories" && <CategoriesView leads={leads} />}
           {view === "analytics" && <AnalyticsView leads={leads} />}
           {view === "activity" && <ActivityView />}
+          {view === "online" && <OnlineConsultationTab />}
           {view === "videos" && <VideosTab />}
           {view === "site" && <SiteInfoTab />}
           {view === "tracking" && <TrackingTab />}

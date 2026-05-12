@@ -1,81 +1,87 @@
-# Premium Payment Flow + Auto User Accounts
+# Plan: Consultancy Platform Enhancements
 
-## 1. Premium Multi-Step Payment Page (`/payment`)
+আপনি যা চেয়েছেন সেগুলো + কিছু extra useful feature যোগ করব।
 
-SSL-style stepper with 4 steps:
+## ১. Admin Video & Review Management
 
-```text
-[1 Customer Info] → [2 Choose Method] → [3 Pay & Submit TRX] → [4 Confirm]
-```
+**Videos Tab (admin panel)** — ইতিমধ্যে `site_videos` টেবিল আছে কিন্তু admin UI নেই। যোগ করব:
+- Add/Edit/Delete YouTube video (review type / promo type / consultancy content)
+- Title, video ID, type, sort order, active toggle
+- Live preview thumbnail
 
-- **Step 1**: Name, phone, email, package select. Validate before next.
-- **Step 2**: Choose payment method (bKash/Nagad/Rocket/Bank cards with logos). On Next →
-- **Step 3**: Reveal account number + copy button + amount. Inputs: sender number, TRX ID, **screenshot upload** (Supabase Storage bucket `payment_proofs`), optional note.
-- **Step 4**: Review & Confirm → insert into `payment_submissions` → redirect to `/thank-you?id=...`.
+**Reviews Management (নতুন)** — দুই ধরনের review:
+- **Image Reviews** — screenshot/photo upload (Facebook review, client photo) → storage bucket `reviews`
+- **Video Reviews** — already covered via site_videos (type=review)
+- নতুন `reviews` table: type (image/video), media_url বা video_id, client_name, rating, caption, sort_order, active
+- Public site এ review section এ সব দেখাবে (carousel)
 
-Premium polish: progress bar, framer-motion transitions between steps, gradient cards, trust badges (SSL/secure/refund), method logos.
+## ২. Consultation Scheduling System (মূল feature)
 
-## 2. Thank You Page (`/thank-you?id=<submission_id>`)
+**Database changes:**
+- নতুন `consultation_schedules` table:
+  - payment_submission_id (FK), user_id, scheduled_at (timestamp), duration_minutes (15/30/60), meet_link, status (scheduled/completed/cancelled), admin_notes
+  - **UNIQUE constraint on `scheduled_at`** → একই সময়ে দুটো schedule হতে পারবে না
+- যদি admin একই time দিতে চায় → আগের schedule cancel করতে হবে (UI তে confirmation modal: "এই সময়ে অলরেডি একটা meeting আছে — cancel করে নতুন বুক করবেন?")
 
-- Live status badge (pending / confirmed / rejected) via Supabase **realtime** subscription on `payment_submissions` row.
-- Service details (package, amount, method, TRX, submitted at).
-- Emergency contact card: WhatsApp button, phone, email.
-- "What's next" timeline.
-- When status flips to `confirmed`, show success animation + next-steps CTA.
+**Admin flow:**
+- Payment approve হলে → "Schedule Meeting" button আসবে
+- Modal: date + time picker (অলরেডি booked slot গুলো disabled দেখাবে), duration dropdown (15/30/45/60/90 min), meet link input (Google Meet / Zoom)
+- Save করলে user এর profile এ realtime update যাবে
 
-## 3. Auto User Account on Consultation Submit
+**User account flow (`/account`):**
+- "Upcoming Consultations" section
+- Each card: date, time, duration, "Join Meeting" button
+- Meeting time এর ১০ মিনিট আগে থেকে button active হবে (এর আগে disabled + countdown দেখাবে: "শুরু হবে ২ ঘণ্টা ১৫ মিনিটে")
+- meeting শেষ হলে "Completed" badge
 
-Currently `online-consultation` submits to `appointments`. New flow:
+## ৩. Manual Signup/Signin (Phone + Password)
 
-- After form submit, prompt user to **set a password** (inline modal step).
-- Call edge function `create-consultation-user` (service role) that:
-  - Creates `auth.users` with email + password (admin API, email_confirm = true).
-  - Creates `profiles` row with name, phone, address, problem details copied from form.
-  - Links the appointment to `user_id`.
-- If email already exists → tell user to log in / reset password.
-- After success, sign in client-side with the new password and route to `/account`.
+**ইতিমধ্যে আছে:** consultation form submit করলে auto account তৈরি হয়।
 
-New `/account` page: shows their profile data + appointments + payment submissions.
+**নতুন যোগ করব:**
+- Public `/signup` page: name, phone, email, password → Supabase auth দিয়ে account create
+- Public `/login` page: email/phone + password
+- Phone কে email-এ convert করব internally: `<phone>@phone.local` (যেহেতু Supabase auth এর email লাগে আর OTP চাচ্ছেন না)
+- "Forgot password" — email-based reset (যাদের real email আছে)
 
-## 4. Admin User Management Tab
+## ৪. Extra Features (আমার suggestion)
 
-New `UsersTab` in admin panel:
-
-- List all profiles (name, email, phone, created_at, last appointment).
-- Edit profile fields.
-- **Reset password**: admin-only edge function `admin-update-user-password` calls `auth.admin.updateUserById`.
-- View user's appointments + payments.
-
-## 5. Admin Payment Confirmation → Realtime
-
-`PaymentsTab` already has confirm/reject buttons. Add:
-- Enable Supabase Realtime on `payment_submissions`.
-- Thank-you page subscribes by submission id; status updates instantly.
+- **Notifications/Bell icon** in user account → meeting scheduled, payment confirmed, ইত্যাদি
+- **Admin Dashboard stats card**: total scheduled meetings আজ/this week, upcoming in next 24h
+- **Email/SMS reminder** (future-ready, এখন শুধু schema): meeting এর ২৪ ঘণ্টা আগে notification flag
+- **Reschedule request** from user side → admin approve করলে নতুন time
+- **Meeting history** in user profile — পুরাতন meeting গুলোর list with admin notes
 
 ## Technical Details
 
-**DB migration:**
-- `profiles` table (user_id FK, name, email, phone, address, problem_type, details).
-- `appointments`: add nullable `user_id uuid`.
-- `payment_submissions`: ensure `screenshot_url text` column.
-- Storage bucket `payment_proofs` (private; admin read, public insert via signed upload).
-- Enable realtime publication for `payment_submissions`.
-- RLS: users select/update own profile; admins all.
+**Migration:**
+```sql
+-- reviews table
+CREATE TABLE reviews (id, type CHECK IN ('image','video'), media_url, video_id, client_name, rating int, caption, sort_order, active, ...)
+-- consultation_schedules
+CREATE TABLE consultation_schedules (
+  id, payment_submission_id, user_id, scheduled_at timestamptz UNIQUE,
+  duration_minutes int CHECK (>0), meet_link, status, admin_notes, ...
+)
+-- storage bucket 'reviews' (public read)
+-- realtime publication on consultation_schedules
+-- RLS: users see own schedules, admins see all
+```
 
-**Edge functions** (service role):
-- `create-consultation-user` — creates auth user + profile, links appointment.
-- `admin-update-user-password` — verifies caller is admin via JWT, then resets password.
+**Files to add/edit:**
+- `src/components/admin/VideosTab.tsx` (নতুন)
+- `src/components/admin/ReviewsTab.tsx` (নতুন)
+- `src/components/admin/ScheduleMeetingDialog.tsx` (নতুন) — date/time picker, conflict detection
+- `src/components/admin/PaymentsTab.tsx` — "Schedule Meeting" button যোগ
+- `src/routes/account.tsx` — upcoming meetings section + join button with countdown
+- `src/routes/signup.tsx`, `src/routes/login.tsx` (phone-based) — নতুন
+- `src/routes/admin.tsx` — Videos, Reviews tab যোগ
+- Public site review section update — image + video mixed display
 
-**Files:**
-- Rewrite `src/routes/payment.tsx` as multi-step wizard (extract step components).
-- New `src/routes/thank-you.tsx`.
-- New `src/routes/account.tsx`.
-- New `src/components/admin/UsersTab.tsx` + add tab in `admin.tsx`.
-- Update `online-consultation.tsx` form submit to include password step + call edge function.
-- Update `PaymentsTab.tsx` to show screenshot.
+**Conflict detection:** `scheduled_at UNIQUE` + admin UI তে existing schedules query করে time slots blocked দেখাবে; force booking করলে আগেরটা auto-cancel।
 
-## Open Questions
+---
 
-1. Screenshot upload — required or optional in step 3?
-2. For consultation auto-account: should email be **required** in the form (currently optional)? Needed for auth.
-3. Existing email handling: redirect to login, or just attach the new appointment to the existing user if they enter the right password?
+**আপনার কাছে দুইটা ছোট প্রশ্ন:**
+1. Meeting এর duration গুলো কী কী option দিব? (আমি default 15/30/45/60/90 minutes ভাবছি)
+2. Phone login এর জন্য — শুধু Bangladesh numbers (+880) accept করব নাকি international?

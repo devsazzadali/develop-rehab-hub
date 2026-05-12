@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import {
   Video, Globe2, Clock, ShieldCheck, CheckCircle2, Sparkles, Star, MessageCircle,
   Phone, ChevronDown, Heart, Award, Users, Headphones, Wallet, Calendar,
+  X as XIcon, Quote, TrendingUp, Stethoscope, Home, Plane, Briefcase, Baby, Activity, Zap,
 } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";

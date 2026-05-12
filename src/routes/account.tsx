@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, LogOut, User as UserIcon, Phone, Mail, MapPin, Stethoscope, Calendar, Wallet, ShieldCheck } from "lucide-react";
+import { Loader2, LogOut, User as UserIcon, Phone, Mail, MapPin, Stethoscope, Calendar, Wallet, ShieldCheck, Video, ExternalLink, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";

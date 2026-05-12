@@ -331,8 +331,8 @@ function Step3Pay({ method, pkg, form, setForm, screenshot, setScreenshot, copy 
         )}
       </div>
 
-      <Input icon={Phone} label="যে নাম্বার থেকে পাঠিয়েছেন *" value={form.sender_number} onChange={(v: string) => setForm({ ...form, sender_number: v })} placeholder="01XXXXXXXXX" />
-      <Input icon={Hash} label="Transaction ID (TRX) *" value={form.transaction_id} onChange={(v: string) => setForm({ ...form, transaction_id: v })} placeholder="যেমন: 8N7A2K9X" />
+      <Input icon={Phone} label="যে নাম্বার থেকে পাঠিয়েছেন *" value={form.sender_number} onChange={(v) => setForm({ ...form, sender_number: v })} placeholder="01XXXXXXXXX" />
+      <Input icon={Hash} label="Transaction ID (TRX) *" value={form.transaction_id} onChange={(v) => setForm({ ...form, transaction_id: v })} placeholder="যেমন: 8N7A2K9X" />
 
       <ScreenshotUpload value={screenshot} onChange={setScreenshot} />
 

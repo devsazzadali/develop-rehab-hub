@@ -235,11 +235,20 @@ function SubmissionDrawer({ item, onClose, reload }: { item: Submission; onClose
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border font-semibold disabled:opacity-70">
             <Clock className="w-4 h-4" /> Mark Pending
           </button>
+          {item.status === "confirmed" && (
+            <button onClick={() => setShowSchedule(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg gradient-primary text-primary-foreground font-semibold">
+              <Calendar className="w-4 h-4" /> Schedule Meeting
+            </button>
+          )}
           <button onClick={del} className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-destructive/10 text-destructive font-semibold">
             <Trash2 className="w-4 h-4" /> Delete
           </button>
         </div>
       </div>
+      {showSchedule && (
+        <ScheduleMeetingDialog paymentSubmission={item} onClose={() => setShowSchedule(false)} onSaved={reload} />
+      )}
     </div>
   );
 }
